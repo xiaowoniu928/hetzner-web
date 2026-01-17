@@ -566,6 +566,15 @@ def _resolve_cf_record(record_cfg: Any, fallback_zone: str, fallback_token: str)
     return None
 
 
+def _verify_dns_record(record: str, expected_ip: str) -> Dict[str, Any]:
+    try:
+        socket.setdefaulttimeout(5)
+        resolved = socket.gethostbyname(record)
+        return {"ok": resolved == expected_ip, "resolved": resolved}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
 def _build_daily_report(config: Dict[str, Any], client: "HetznerClient") -> str:
     traffic_cfg = config.get("traffic", {})
     limit_gb = traffic_cfg.get("limit_gb")
@@ -753,12 +762,21 @@ def _perform_rebuild(
             )
         if telegram_cfg.get("enabled") and bot_token and chat_id:
             dns_text = ""
+            verify_text = ""
             if dns_result:
                 dns_text = "✅ DNS 已更新" if dns_result.get("success") else f"❌ DNS 失败: {dns_result.get('error')}"
+                if dns_result.get("success") and resolved:
+                    verify = _verify_dns_record(resolved["record"], result.get("new_ip", ""))
+                    if verify.get("ok"):
+                        verify_text = f"\n✅ DNS 解析一致: `{verify.get('resolved')}`"
+                    elif verify.get("resolved"):
+                        verify_text = f"\n⚠️ DNS 解析不一致: `{verify.get('resolved')}`"
+                    elif verify.get("error"):
+                        verify_text = f"\n⚠️ DNS 校验失败: {verify.get('error')}"
             _send_telegram_markdown(
                 bot_token,
                 chat_id,
-                f"✅ **[{server_name}]** 重建完成\nIP: `{result.get('new_ip')}`\n{dns_text}",
+                f"✅ **[{server_name}]** 重建完成\nIP: `{result.get('new_ip')}`\n{dns_text}{verify_text}",
             )
         return {"success": True, "dns": dns_result}
     finally:
