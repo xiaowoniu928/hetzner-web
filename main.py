@@ -687,8 +687,16 @@ def _collect_traffic_snapshot(client: "HetznerClient") -> Dict[str, Any]:
     return snapshot
 
 
-def _record_hourly_snapshot(state: Dict[str, Any], now: datetime, client: "HetznerClient") -> None:
-    hour_key = now.strftime("%Y-%m-%d %H:00")
+def _record_hourly_snapshot(
+    state: Dict[str, Any],
+    now: datetime,
+    client: "HetznerClient",
+    interval_minutes: int = 60,
+) -> None:
+    interval = max(1, min(60, int(interval_minutes)))
+    bucket_minute = (now.minute // interval) * interval
+    bucket_time = now.replace(minute=bucket_minute, second=0, microsecond=0)
+    hour_key = bucket_time.strftime("%Y-%m-%d %H:00") if interval >= 60 else bucket_time.strftime("%Y-%m-%d %H:%M")
     hourly = state.get("hourly", {})
     if hour_key in hourly:
         return
@@ -734,7 +742,8 @@ def _format_hourly_report(hourly: Dict[str, Any], hours: int = 24) -> str:
 def _build_manual_report(config: Dict[str, Any], client: "HetznerClient") -> str:
     now = _now_local()
     state = _load_report_state()
-    _record_hourly_snapshot(state, now, client)
+    interval_minutes = (config.get("traffic") or {}).get("check_interval", 60)
+    _record_hourly_snapshot(state, now, client, interval_minutes)
 
     last_time = state.get("last_time")
     last_snapshot = state.get("servers", {})
@@ -1145,6 +1154,44 @@ def _daily_report_loop() -> None:
         except Exception as e:
             print(f"[alert] daily report error: {e}")
         time.sleep(30)
+
+
+def _snapshot_loop() -> None:
+    while True:
+        try:
+            config = _load_yaml(CONFIG_PATH)
+            token = (config.get("hetzner") or {}).get("api_token", "")
+            if not token:
+                time.sleep(60)
+                continue
+            client = HetznerClient(token)
+            state = _load_report_state()
+            interval_minutes = (config.get("traffic") or {}).get("check_interval", 5)
+            now = _now_local()
+            _record_hourly_snapshot(state, now, client, interval_minutes)
+            hourly = state.get("hourly", {})
+            if len(hourly) == 1:
+                interval = max(1, min(60, int(interval_minutes)))
+                bucket_minute = (now.minute // interval) * interval
+                bucket_time = now.replace(minute=bucket_minute, second=0, microsecond=0)
+                curr_key = (
+                    bucket_time.strftime("%Y-%m-%d %H:00")
+                    if interval >= 60
+                    else bucket_time.strftime("%Y-%m-%d %H:%M")
+                )
+                prev_time = bucket_time - timedelta(minutes=interval)
+                prev_key = (
+                    prev_time.strftime("%Y-%m-%d %H:00")
+                    if interval >= 60
+                    else prev_time.strftime("%Y-%m-%d %H:%M")
+                )
+                if curr_key in hourly and prev_key not in hourly:
+                    hourly[prev_key] = hourly[curr_key]
+                    state["hourly"] = hourly
+            _save_report_state(state)
+        except Exception as e:
+            print(f"[alert] snapshot error: {e}")
+        time.sleep(300)
 
 
 def _handle_bot_command(text: str, config: Dict[str, Any], client: "HetznerClient") -> str:
@@ -1652,6 +1699,7 @@ def _start_traffic_monitor() -> None:
     threading.Thread(target=_daily_report_loop, daemon=True).start()
     threading.Thread(target=_telegram_bot_loop, daemon=True).start()
     threading.Thread(target=_schedule_loop, daemon=True).start()
+    threading.Thread(target=_snapshot_loop, daemon=True).start()
     def _sync_wrapper() -> None:
         try:
             config = _load_yaml(CONFIG_PATH)
