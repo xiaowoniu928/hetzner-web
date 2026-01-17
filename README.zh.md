@@ -27,10 +27,12 @@ Hetzner Web 是面向 Hetzner Cloud 的流量可视化控制室。它把原始�
 ## 功能
 
 - 实时服务器流量（出站/入站）
-- 日/小时拆分表
-- DNS 检查 + 重建操作
+- 日/小时拆分表 + 每日单机柱状图
+- DNS 检查/同步 + 重建操作
+- Telegram 机器人查询与管理
+- 快照重建 + 按快照创建
+- 定时删机/建机
 - 每台机器的趋势火花线
-- 出站/入站流量柱状图
 - Basic Auth 登录
 
 ## 项目结构
@@ -121,11 +123,19 @@ server {
 - `traffic.limit_gb`: 流量上限 (GB)
 - `traffic.check_interval`: 轮询频率（分钟）
 - `traffic.exceed_action`: 超限动作（`rebuild` 或留空）
+- `scheduler.enabled`: 是否开启定时任务
+- `scheduler.delete_time`: 删除时间（HH:MM，逗号分隔）
+- `scheduler.create_time`: 创建时间（HH:MM，逗号分隔）
+- `telegram.bot_token`: Telegram Bot Token
+- `telegram.chat_id`: Telegram Chat ID
 - `telegram.notify_levels`: 告警阈值（百分比）
 - `telegram.daily_report_time`: 每日战报时间（HH:MM）
+- `cloudflare.api_token`: Cloudflare API Token
+- `cloudflare.zone_id`: Cloudflare Zone ID
 - `cloudflare.sync_on_start`: 启动时同步 DNS
 - `cloudflare.record_map`: server_id 或 server_name -> DNS 记录
 - `rebuild.snapshot_id_map`: server_id -> snapshot_id
+- `rebuild.fallback_template`: 重建时回退模板
 
 ### `web_config.json`
 - `username` / `password`: Basic Auth 凭据
@@ -133,10 +143,38 @@ server {
 
 ## Telegram 命令
 
-- `/status` 或 `/ll`：发送今日战报
-- `/servers`：列出服务器流量概览
+查询类：
+- `/list`：服务器列表
+- `/status`：系统状态
+- `/traffic ID`：流量详情（不带 ID 显示全部）
+- `/today ID`：今日流量（不带 ID 显示全部）
+- `/report`：手动流量汇报
+- `/reportstatus`：上次汇报时间
+- `/reportreset`：重置汇报区间
+- `/dnstest ID`：测试 DNS 更新
+- `/dnscheck ID`：DNS 解析检查
+
+控制类：
+- `/startserver <ID>`：启动服务器
+- `/stopserver <ID>`：停止服务器
+- `/reboot <ID>`：重启服务器
+- `/delete <ID> confirm`：删除服务器
+- `/rebuild <ID>`：重建服务器
+
+快照管理：
+- `/snapshots`：查看快照
+- `/createsnapshot <ID>`：创建快照
+- `/createfromsnapshot <SNAP_ID>`：按快照创建服务器
+- `/createfromsnapshots`：按映射快照批量创建
+
+定时任务：
+- `/scheduleon`：开启定时删机
+- `/scheduleoff`：关闭定时删机
+- `/schedulestatus`：查看定时状态
+- `/scheduleset delete=23:50,01:00 create=08:00,09:00`：设置定时
+
+DNS：
 - `/dnsync`：同步 Cloudflare DNS
-- `/rebuild 服务器名`：触发重建
 
 > `cloudflare.record_map` 支持对象格式：`{ record, zone_id, api_token }`，可为不同服务器配置不同 Zone。
 

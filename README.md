@@ -27,10 +27,12 @@ hourly insights, highlights cap risk, and keeps rebuild/DNS actions close to the
 ## Features
 
 - Real-time server traffic (outbound/inbound)
-- Daily/hourly breakdown tables
-- DNS check + rebuild actions
+- Daily/hourly breakdown tables + daily per-server bars
+- DNS check/sync + rebuild actions
+- Telegram bot for query + control commands
+- Snapshot rebuild + create from snapshot
+- Scheduler for timed delete/create
 - Trend sparkline per server
-- Traffic bar chart (outbound/inbound)
 - Basic Auth login
 
 ## Project Layout
@@ -121,11 +123,19 @@ server {
 - `traffic.limit_gb`: traffic limit (GB)
 - `traffic.check_interval`: polling interval (minutes)
 - `traffic.exceed_action`: action on limit exceed (`rebuild` or empty)
+- `scheduler.enabled`: enable scheduled tasks
+- `scheduler.delete_time`: delete times (HH:MM, comma-separated)
+- `scheduler.create_time`: create times (HH:MM, comma-separated)
+- `telegram.bot_token`: Telegram bot token
+- `telegram.chat_id`: Telegram chat ID
 - `telegram.notify_levels`: alert thresholds (percent)
 - `telegram.daily_report_time`: daily report time (HH:MM)
+- `cloudflare.api_token`: Cloudflare API token
+- `cloudflare.zone_id`: Cloudflare Zone ID
 - `cloudflare.sync_on_start`: sync DNS on startup
 - `cloudflare.record_map`: server_id or server_name -> DNS record
 - `rebuild.snapshot_id_map`: server_id -> snapshot_id
+- `rebuild.fallback_template`: fallback server template for rebuild
 
 ### `web_config.json`
 - `username` / `password`: Basic Auth credentials
@@ -133,10 +143,38 @@ server {
 
 ## Telegram Commands
 
-- `/status` or `/ll`: send daily report
-- `/servers`: list server traffic overview
+Query:
+- `/list`: server list
+- `/status`: system status
+- `/traffic ID`: traffic details (all if no ID)
+- `/today ID`: today traffic (all if no ID)
+- `/report`: manual traffic report
+- `/reportstatus`: last report time
+- `/reportreset`: reset report window
+- `/dnstest ID`: test DNS update
+- `/dnscheck ID`: check DNS resolve
+
+Control:
+- `/startserver <ID>`: start server
+- `/stopserver <ID>`: stop server
+- `/reboot <ID>`: reboot server
+- `/delete <ID> confirm`: delete server
+- `/rebuild <ID>`: rebuild server
+
+Snapshots:
+- `/snapshots`: list snapshots
+- `/createsnapshot <ID>`: create snapshot
+- `/createfromsnapshot <SNAP_ID>`: create server from snapshot
+- `/createfromsnapshots`: create servers from mapped snapshots
+
+Schedule:
+- `/scheduleon`: enable schedule
+- `/scheduleoff`: disable schedule
+- `/schedulestatus`: show schedule
+- `/scheduleset delete=23:50,01:00 create=08:00,09:00`: set schedule
+
+DNS:
 - `/dnsync`: sync Cloudflare DNS
-- `/rebuild <server-name>`: trigger rebuild
 
 > `cloudflare.record_map` can be an object: `{ record, zone_id, api_token }` for per-server zones.
 

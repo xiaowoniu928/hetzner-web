@@ -10,23 +10,24 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
-        --bg: #f9f7ff;
+        --bg: #f6f1ff;
         --bg-2: #efe6ff;
-        --card: rgba(255, 255, 255, 0.9);
-        --border: rgba(122, 85, 190, 0.22);
-        --text: #1b1330;
-        --muted: #4f3d6a;
-        --accent: #6f3ef5;
-        --accent-2: #8a62f8;
-        --danger: #ff4d5a;
+        --card: #f8f3ff;
+        --border: #d9c8ff;
+        --text: #160c2a;
+        --muted: #3f3558;
+        --accent: #6f4bff;
+        --accent-2: #8a72f5;
+        --danger: #ff5b6b;
         --warning: #ffd166;
-        --mono: "DM Mono", "Fira Mono", monospace;
-        --sans: "Noto Sans SC", "Nunito", "Manrope", system-ui, sans-serif;
+        --mono: "IBM Plex Mono", "Fira Mono", monospace;
+        --sans: "Tsukushi B Round", "TsukushiBMaruGothic", "筑紫B圆", "Hiragino Maru Gothic ProN", "Noto Sans SC",
+          "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
       }
 
       * {
@@ -37,16 +38,77 @@
         margin: 0;
         font-family: var(--sans);
         color: var(--text);
-        background: radial-gradient(1200px 800px at 8% 10%, #e3d4ff, transparent),
-          radial-gradient(900px 700px at 92% 12%, #d7c1ff, transparent),
-          linear-gradient(140deg, #faf7ff, #ebe2ff 50%, #f8f4ff);
+        background: radial-gradient(1200px 700px at 6% -10%, #cbb2ff, transparent 58%),
+          radial-gradient(1100px 700px at 96% -12%, #c8a9ff, transparent 60%),
+          linear-gradient(180deg, #efe2ff 0%, #e0ccff 55%, #efe2ff 100%);
         min-height: 100vh;
+        line-height: 1.55;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        --stack-date-height: 28px;
+        --stack-server-height: 180px;
+      }
+
+      body.theme-dark {
+        --bg: #151225;
+        --bg-2: #1d1630;
+        --card: #19152b;
+        --border: #2c2343;
+        --text: #e6ddf5;
+        --muted: #c6bdd8;
+        --accent: #b49bff;
+        --accent-2: #c7b4ff;
+        --danger: #ff7b86;
+        --stack-date-height: 28px;
+        --stack-server-height: 180px;
+        background: radial-gradient(1200px 700px at 10% -20%, #241836, transparent 60%),
+          radial-gradient(1000px 700px at 90% -20%, #1f1432, transparent 62%),
+          linear-gradient(180deg, #120f1d 0%, #17122a 55%, #120f1d 100%);
+      }
+
+      body.theme-dark .btn {
+        background: #241a38;
+        color: var(--text);
+        border-color: #33254b;
+      }
+
+      body.theme-dark .btn.accent {
+        background: rgba(180, 155, 255, 0.2);
+        border-color: rgba(180, 155, 255, 0.5);
+      }
+
+      body.theme-dark .btn.danger {
+        background: rgba(255, 111, 125, 0.18);
+        border-color: rgba(255, 111, 125, 0.5);
+      }
+
+      body.theme-dark .card,
+      body.theme-dark .detail-card,
+      body.theme-dark .hero-metric,
+      body.theme-dark .table-wrap {
+        background: var(--card);
+        border-color: var(--border);
+      }
+
+      body.theme-dark .table thead th {
+        background: #241a3a;
+      }
+
+      body.theme-dark .table th,
+      body.theme-dark .table td {
+        border-bottom: 1px solid rgba(120, 98, 170, 0.28);
+      }
+
+      body.theme-dark .pill {
+        background: rgba(180, 155, 255, 0.2);
+        border-color: rgba(180, 155, 255, 0.35);
       }
 
       .container {
-        max-width: 1200px;
+        max-width: 1180px;
         margin: 0 auto;
-        padding: 32px 20px 80px;
+        padding: 28px 18px 72px;
+        position: relative;
       }
 
       .hero {
@@ -81,6 +143,8 @@
       .subtitle {
         color: var(--muted);
         font-size: 16px;
+        line-height: 1.6;
+        font-weight: 600;
       }
 
       .toolbar {
@@ -89,6 +153,58 @@
         gap: 12px;
         align-items: center;
         margin-top: 8px;
+      }
+
+      .toolbar-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .overview-card .subtitle {
+        margin-bottom: 6px;
+      }
+
+      .overview-card .toolbar-row {
+        margin-top: 2px;
+      }
+
+      .overview-card .hero-metrics {
+        margin-top: 6px;
+      }
+
+      .toolbar-left {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .toolbar-right {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-end;
+      }
+
+      .toolbar-right.stack {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+        width: auto;
+      }
+
+      .toolbar-actions {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        justify-content: flex-end;
+        width: auto;
+        height: 32px;
       }
 
       .lang-toggle {
@@ -100,16 +216,23 @@
       .lang-toggle .btn {
         padding: 6px 10px;
         font-size: 12px;
+        height: 32px;
       }
 
       .btn {
         border: 1px solid var(--border);
-        background: var(--card);
+        background: #f4f7ff;
         color: var(--text);
-        padding: 10px 14px;
-        border-radius: 10px;
+        padding: 7px 12px;
+        border-radius: 999px;
         cursor: pointer;
         transition: transform 0.2s ease, background 0.2s ease;
+        font-size: 12px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
       }
 
       .btn:hover {
@@ -118,13 +241,18 @@
       }
 
       .btn.accent {
-        background: linear-gradient(135deg, rgba(124, 77, 255, 0.25), rgba(171, 126, 255, 0.35));
-        border-color: rgba(124, 77, 255, 0.5);
+        background: rgba(79, 124, 255, 0.14);
+        border-color: rgba(79, 124, 255, 0.4);
       }
 
       .btn.danger {
-        background: rgba(255, 92, 92, 0.16);
-        border-color: rgba(255, 92, 92, 0.6);
+        background: rgba(255, 92, 92, 0.12);
+        border-color: rgba(255, 92, 92, 0.5);
+      }
+
+      .btn.logout-btn {
+        padding: 7px 12px;
+        font-weight: 600;
       }
 
       .grid {
@@ -260,7 +388,7 @@
         display: grid;
         grid-template-rows: repeat(24, 1fr);
         gap: 2px;
-        font-size: 10px;
+        font-size: 9px;
         color: var(--muted);
       }
 
@@ -288,15 +416,16 @@
         background: var(--card);
         border: 1px solid var(--border);
         border-radius: 16px;
-        padding: 18px;
-        box-shadow: 0 10px 30px rgba(64, 45, 110, 0.08);
+        padding: 16px 18px;
+        box-shadow: 0 10px 22px rgba(34, 45, 74, 0.08);
       }
 
       .card h3 {
         margin: 0 0 10px;
-        font-size: 22px;
+        font-size: 23px;
         letter-spacing: -0.01em;
-        color: #3b2a64;
+        color: var(--text);
+        font-weight: 700;
       }
 
       .status {
@@ -307,29 +436,89 @@
         color: var(--muted);
       }
 
+      .status.align-right {
+        justify-content: flex-end;
+        width: auto;
+        height: 32px;
+        text-align: right;
+      }
+
+      .overview-tools {
+        display: grid;
+        gap: 6px;
+        justify-items: end;
+        align-items: start;
+      }
       .pill {
         padding: 4px 8px;
         border-radius: 999px;
         font-size: 12px;
-        background: rgba(255, 255, 255, 0.12);
+        background: rgba(111, 75, 255, 0.12);
+        border: 1px solid rgba(145, 121, 199, 0.2);
+      }
+
+      .lang-floating {
+        position: absolute;
+        top: 22px;
+        right: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 5;
       }
 
       .table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 14px;
+        font-size: 15px;
       }
 
       .table thead th {
-        background: rgba(124, 77, 255, 0.12);
+        background: #efe8ff;
       }
 
       .table th,
       .table td {
-        padding: 8px 10px;
+        padding: 9px 10px;
         text-align: left;
-        border-bottom: 1px solid rgba(124, 77, 255, 0.12);
+        border-bottom: 1px solid rgba(134, 109, 189, 0.18);
         vertical-align: middle;
+        font-weight: 600;
+      }
+
+      .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+      }
+
+      .daily-matrix thead th {
+        position: sticky;
+        top: 0;
+        z-index: 6;
+        background: #efe8ff;
+      }
+
+      .daily-matrix .col-date {
+        position: sticky;
+        left: 0;
+        z-index: 5;
+        background: var(--card);
+        box-shadow: 2px 0 0 rgba(134, 109, 189, 0.12);
+      }
+
+      .daily-matrix thead .col-date {
+        z-index: 7;
+        background: #efe8ff;
+      }
+
+      .daily-matrix thead tr:nth-child(2) th {
+        top: 34px;
+      }
+
+      .daily-matrix {
+        border-collapse: separate;
+        border-spacing: 0;
       }
 
       .table th {
@@ -344,8 +533,8 @@
       .table-wrap {
         border-radius: 14px;
         overflow: hidden;
-        border: 1px solid rgba(122, 85, 190, 0.22);
-        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(145, 121, 199, 0.2);
+        background: #ffffff;
       }
       .table th.group {
         text-align: center;
@@ -404,6 +593,10 @@
       .delta-down {
         color: #ef4444;
         font-weight: 600;
+      }
+      .peak-highlight {
+        color: var(--accent);
+        font-weight: 700;
       }
 
       .login {
@@ -714,6 +907,18 @@
         gap: 10px;
       }
 
+      .overview-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .overview-text {
+        display: grid;
+        gap: 4px;
+      }
+
       .trend-title {
         display: inline-flex;
         align-items: center;
@@ -852,18 +1057,62 @@
         font-family: var(--mono);
         color: var(--muted);
       }
-      .stack-chart {
+      .stack-chart-wrap {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 12px;
+        align-items: stretch;
         margin-top: 12px;
+      }
+      .stack-legend-left {
+        display: grid;
+        grid-template-rows: var(--stack-date-height) auto;
+        gap: 10px;
+        position: sticky;
+        left: 0;
+        top: 0;
+        align-self: stretch;
+        padding: 8px 4px 4px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(122, 85, 190, 0.18);
+        min-width: 76px;
+        height: 100%;
+      }
+      .stack-legend-date {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: var(--stack-date-height);
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .stack-legend-date span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .stack-legend-date i {
+        width: 10px;
+        height: 10px;
+        border-radius: 4px;
+        display: inline-block;
+      }
+      .stack-legend-left .stack-legend {
+        margin-top: 10px;
+      }
+      .stack-chart {
         overflow-x: auto;
         overflow-y: hidden;
       }
       .stack-bars {
         display: grid;
         grid-auto-flow: column;
-        grid-auto-columns: minmax(40px, 1fr);
+        grid-auto-columns: minmax(140px, 1fr);
         gap: 12px;
-        align-items: end;
-        height: 220px;
+        align-items: start;
+        min-height: 220px;
         padding: 10px;
         border-radius: 12px;
         background: rgba(255, 255, 255, 0.6);
@@ -873,9 +1122,106 @@
       }
       .stack-day {
         display: grid;
-        gap: 6px;
+        gap: 8px;
         justify-items: center;
         font-size: 11px;
+      }
+      .stack-day-title {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+        padding: 4px 8px;
+        border-radius: 8px;
+        background: #efe8ff;
+        border: 1px solid rgba(134, 109, 189, 0.18);
+        box-shadow: 0 10px 18px rgba(48, 26, 88, 0.18);
+        height: var(--stack-date-height);
+        display: inline-flex;
+        align-items: center;
+      }
+      .stack-day-servers {
+        display: grid;
+        gap: 10px;
+        width: 100%;
+      }
+      .stack-server {
+        display: grid;
+        gap: 4px;
+        justify-items: center;
+        padding: 4px 6px;
+        border-radius: 10px;
+        background: rgba(124, 77, 255, 0.06);
+        border: 1px solid rgba(122, 85, 190, 0.14);
+        height: var(--stack-server-height);
+      }
+      .stack-server-legend {
+        display: grid;
+        grid-auto-rows: var(--stack-server-height);
+        gap: 10px;
+        margin-top: 0;
+        font-size: 8px;
+        color: var(--muted);
+      }
+      .stack-server-legend span {
+        height: var(--stack-server-height);
+        align-items: center;
+      }
+      .stack-server-legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 2px 4px;
+        border-radius: 999px;
+        border: 1px solid rgba(122, 85, 190, 0.2);
+        background: rgba(124, 77, 255, 0.08);
+      }
+      .stack-server-key {
+        width: 12px;
+        height: 12px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 7px;
+        font-weight: 700;
+        background: rgba(124, 77, 255, 0.2);
+        color: var(--text);
+      }
+      .stack-server-bars {
+        height: 140px;
+        display: flex;
+        align-items: flex-end;
+        gap: 6px;
+      }
+      .stack-server-bars .bar {
+        width: 12px;
+      }
+      .stack-server-values {
+        font-family: var(--mono);
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      body.theme-dark .stack-day-title {
+        background: #241a3a;
+        border-color: rgba(120, 98, 170, 0.28);
+        box-shadow: 0 10px 20px rgba(8, 4, 16, 0.6);
+        color: var(--text);
+      }
+      body.theme-dark .stack-server {
+        background: rgba(124, 77, 255, 0.12);
+        border-color: rgba(122, 85, 190, 0.28);
+      }
+      body.theme-dark .stack-server-legend span {
+        background: rgba(124, 77, 255, 0.16);
+        border-color: rgba(122, 85, 190, 0.35);
+      }
+      body.theme-dark .stack-server-key {
+        background: rgba(124, 77, 255, 0.3);
+      }
+      body.theme-dark .stack-legend-left {
+        background: rgba(24, 18, 38, 0.95);
+        border-color: rgba(122, 85, 190, 0.35);
       }
       .stack-bars .bar {
         width: 16px;
@@ -1073,15 +1419,15 @@
       }
 
       .detail-title {
-        font-size: 16px;
+        font-size: 17px;
         font-weight: 600;
-        color: #3b2a64;
+        color: var(--text);
         margin-bottom: 6px;
       }
 
       .detail-card {
-        background: rgba(255, 255, 255, 0.76);
-        border: 1px solid rgba(122, 85, 190, 0.12);
+        background: var(--card);
+        border: 1px solid var(--border);
         border-radius: 14px;
         padding: 14px;
       }
@@ -1133,6 +1479,7 @@
 
       .matrix-wrap {
         overflow-x: auto;
+        position: relative;
       }
 
       .scroll-box {
@@ -1185,18 +1532,27 @@
         display: grid;
         gap: 12px;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        margin-top: 10px;
       }
 
       .hero-metric {
         padding: 14px;
         border-radius: 14px;
-        background: rgba(255, 255, 255, 0.7);
-        border: 1px solid rgba(122, 85, 190, 0.2);
+        background: var(--card);
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-metric .status {
+        color: var(--text);
+        font-weight: 600;
       }
 
       .hero-metric .metric {
         margin-top: 4px;
-        font-size: 24px;
+        font-size: 26px;
       }
 
       @media (max-width: 860px) {
@@ -1339,21 +1695,28 @@
       </div>
 
       <template v-else>
+        <div class="lang-floating">
+          <span class="pill">{{ langPack.langLabel }}</span>
+          <button class="btn" :class="{ accent: lang === 'zh' }" @click="setLang('zh')">中文</button>
+          <button class="btn" :class="{ accent: lang === 'en' }" @click="setLang('en')">EN</button>
+        </div>
         <section class="grid">
-          <div class="card">
-            <h3 class="title-with-icon">{{ langPack.overviewTitle }}</h3>
-            <div class="subtitle">{{ langPack.overviewSubtitle }}</div>
-            <div class="toolbar">
-              <button class="btn" @click="dnsCheck()">{{ langPack.dnsCheck }}</button>
-              <button class="btn danger" @click="logout">{{ langPack.logout }}</button>
-              <div class="lang-toggle">
-                <span class="pill">{{ langPack.langLabel }}</span>
-                <button class="btn" :class="{ accent: lang === 'zh' }" @click="setLang('zh')">中文</button>
-                <button class="btn" :class="{ accent: lang === 'en' }" @click="setLang('en')">EN</button>
+          <div class="card overview-card">
+            <div class="overview-head">
+              <div class="overview-text">
+                <h3 class="title-with-icon">{{ langPack.overviewTitle }}</h3>
+                <div class="subtitle">{{ langPack.overviewSubtitle }}</div>
               </div>
-              <div class="status">
-                <span class="pill">{{ langPack.updatedAt }}</span>
-                <span>{{ updatedAt || "—" }}</span>
+              <div class="toolbar-right stack overview-tools">
+                <div class="toolbar-actions">
+                  <button class="btn" @click="toggleTheme">{{ themeToggleText }}</button>
+                  <button class="btn" @click="dnsCheck()">{{ langPack.dnsCheck }}</button>
+                  <button class="btn danger logout-btn" @click="logout">{{ langPack.logout }}</button>
+                </div>
+                <div class="status align-right">
+                  <span class="pill">{{ langPack.updatedAt }}</span>
+                  <span>{{ updatedAt || "—" }}</span>
+                </div>
               </div>
             </div>
             <div class="hero-metrics">
@@ -1380,8 +1743,9 @@
               <div class="hero-metric">
                 <div class="status">{{ langPack.todayVsYesterdayOutbound }}</div>
                 <div class="metric">{{ todayOutboundTb }} <small>TB</small></div>
+                <div class="muted">{{ langPack.yesterdayLabel }} {{ yesterdayOutboundTb }} TB</div>
                 <div class="muted">
-                  {{ langPack.yesterdayLabel }} {{ yesterdayOutboundTb }} TB · {{ langPack.changeLabel }}
+                  {{ langPack.changeLabel }}
                   <span :class="dayDeltaClass">{{ dayDeltaTb }} TB ({{ dayDeltaPct }})</span>
                 </div>
               </div>
@@ -1389,33 +1753,16 @@
                 <div class="status">{{ langPack.monthOutbound }}</div>
                 <div class="metric">{{ monthOutboundTb }} <small>TB</small></div>
                 <div class="muted">{{ langPack.monthDailyAvg }} {{ monthDailyAvgTb }} TB</div>
-                <div class="muted">{{ langPack.monthPeak }} {{ monthPeakTb }} TB ({{ monthPeakDay || "—" }})</div>
+                <div class="muted">
+                  {{ langPack.monthPeak }}
+                  <span class="peak-highlight">{{ monthPeakTb }} TB</span>
+                  ({{ monthPeakDay || "—" }})
+                </div>
               </div>
               <div class="hero-metric">
                 <div class="status">{{ langPack.recentRebuild }}</div>
                 <div class="metric">{{ lastRebuildAt || "—" }}</div>
                 <div class="muted">{{ lastRebuildServer || "—" }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <h3 class="title-with-icon">📌 {{ langPack.aboutTitle }}</h3>
-            <div class="about-grid">
-              <div>
-                <div class="about-lead">{{ langPack.aboutLead }}</div>
-                <div class="muted">{{ langPack.aboutBody }}</div>
-              </div>
-              <div class="about-section">
-                <h4>{{ langPack.highlightsTitle }}</h4>
-                <ul class="about-list">
-                  <li v-for="item in langPack.highlights" :key="item">{{ item }}</li>
-                </ul>
-              </div>
-              <div class="about-section">
-                <h4>{{ langPack.additionsTitle }}</h4>
-                <ul class="about-list">
-                  <li v-for="item in langPack.additions" :key="item">{{ item }}</li>
-                </ul>
               </div>
             </div>
           </div>
@@ -1465,8 +1812,8 @@
                     <td>{{ s.outbound_tb }}</td>
                     <td>{{ s.inbound_tb }}</td>
                     <td>
-                      {{ trafficLimitTb }} /
-                      {{ Math.max(0, trafficLimitTb - parseFloat(s.outbound_tb || 0)).toFixed(3) }} TB
+                      {{ Math.max(0, trafficLimitTb - parseFloat(s.outbound_tb || 0)).toFixed(3) }} /
+                      {{ trafficLimitTb }}
                     </td>
                     <td>{{ s.eta_display || "—" }}</td>
                     <td>
@@ -1501,7 +1848,41 @@
             </div>
             <div class="detail-grid">
               <div class="detail-card">
-              <div class="detail-title title-with-icon">{{ langPack.dailyTitle }}</div>
+                <div class="detail-title title-with-icon">{{ langPack.trafficBarsTitle }}</div>
+                <div class="muted">{{ langPack.trafficBarsHint }}</div>
+                <div v-if="dailyStackDays.length === 0" class="muted">{{ langPack.noData }}</div>
+                <div v-else class="stack-chart-wrap">
+                  <div v-if="dailyStackServers.length" class="stack-legend-left">
+                    <div class="stack-legend-date">
+                      <span><i style="background:#7c4dff"></i>{{ langPack.outbound }}</span>
+                      <span><i style="background:#14b8a6"></i>{{ langPack.inbound }}</span>
+                    </div>
+                    <div class="stack-server-legend">
+                      <span v-for="(srv, idx) in dailyStackServers" :key="`stack-legend-${srv.id}`">
+                        <i class="stack-server-key">{{ idx + 1 }}</i>{{ srv.name }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="stack-chart" ref="dailyStackChart">
+                    <div class="stack-bars">
+                      <div v-for="d in dailyStackDays" :key="`stack-${d.date}`" class="stack-day">
+                        <div class="stack-day-title">{{ d.label }}</div>
+                        <div class="stack-day-servers">
+                          <div v-for="srv in d.servers" :key="`${d.date}-${srv.id}`" class="stack-server">
+                            <div class="stack-server-bars">
+                              <div class="bar bar-out" :style="{ height: `${srv.outPct}%` }"></div>
+                              <div class="bar bar-in" :style="{ height: `${srv.inPct}%` }"></div>
+                            </div>
+                            <div class="stack-server-values">{{ srv.out }} TB / {{ srv.in }} TB</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-title title-with-icon">{{ langPack.dailyTitle }}</div>
                 <div v-if="dailyServerOptions.length === 0" class="muted">{{ langPack.noData }}</div>
                 <div v-else>
                   <div class="selector">
@@ -1517,16 +1898,16 @@
                   </div>
                   <div v-if="dailyMatrix.rows.length === 0" class="muted">{{ langPack.selectAtLeastOne }}</div>
                   <div v-else class="matrix-wrap scroll-box">
-                    <table class="table compact-table">
+                    <table class="table compact-table daily-matrix">
                       <thead>
                         <tr>
-                          <th>{{ langPack.tableDate }}</th>
+                          <th class="col-date">{{ langPack.tableDate }}</th>
                           <th v-for="srv in dailyMatrix.servers" :key="srv.id + '-name'" colspan="2" class="group">
                             {{ srv.name }}
                           </th>
                         </tr>
                         <tr>
-                          <th></th>
+                          <th class="col-date"></th>
                           <template v-for="srv in dailyMatrix.servers" :key="srv.id + '-cols'">
                             <th class="sub">{{ langPack.outbound }}</th>
                             <th class="sub divider">{{ langPack.inbound }}</th>
@@ -1535,7 +1916,7 @@
                       </thead>
                       <tbody>
                         <tr v-for="row in dailyMatrix.rows" :key="row.date">
-                          <td class="mono">{{ row.date }}</td>
+                          <td class="mono col-date">{{ row.date }}</td>
                           <td v-for="(val, idx) in row.outValues" :key="row.date + '-out-' + idx" class="sub">
                             {{ val }} TB
                           </td>
@@ -1548,28 +1929,6 @@
                   </div>
                 </div>
               </div>
-              <div class="detail-card">
-                <div class="detail-title title-with-icon">{{ langPack.trafficBarsTitle }}</div>
-                <div class="muted">{{ langPack.trafficBarsHint }}</div>
-                <div v-if="dailyStackDays.length === 0" class="muted">{{ langPack.noData }}</div>
-                <div v-else class="stack-chart">
-                  <div class="stack-bars">
-                    <div v-for="d in dailyStackDays" :key="`stack-${d.date}`" class="stack-day">
-                      <div class="stack-values">{{ d.out }} TB / {{ d.in }} TB</div>
-                      <div class="stack-bar-box">
-                        <div class="bar bar-out" :style="{ height: `${d.outPct}%` }"></div>
-                        <div class="bar bar-in" :style="{ height: `${d.inPct}%` }"></div>
-                      </div>
-                      <div class="bar-label">{{ d.date.slice(5) }}</div>
-                    </div>
-                  </div>
-                  <div class="stack-legend">
-                    <span><i style="background:#7c4dff"></i>{{ langPack.outbound }}</span>
-                    <span><i style="background:#14b8a6"></i>{{ langPack.inbound }}</span>
-                  </div>
-                </div>
-              </div>
-
             </div>
           </div>
 
@@ -1589,10 +1948,12 @@
           const storedLang = localStorage.getItem("hz_lang");
           const browserLang = (navigator.language || "").toLowerCase();
           const defaultLang = storedLang || (browserLang.startsWith("zh") ? "zh" : "en");
+          const params = new URLSearchParams(window.location.search);
           return {
             username: localStorage.getItem("hz_user") || "",
             password: localStorage.getItem("hz_pass") || "",
             authed: false,
+            demoMode: params.get("demo") === "1",
             lang: defaultLang,
             servers: [],
             serverFilter: "",
@@ -1642,6 +2003,7 @@
             dailyMatrix: { servers: [], rows: [] },
             dailyServerOptions: [],
             dailySelectedIds: [],
+            dailyStackServers: [],
             dailyStackDays: [],
             dailyOutPoints: [],
             dailyInPoints: [],
@@ -1717,6 +2079,7 @@
             cycleHeatmapMax: 0,
             cycleHeatmapMin: 0,
             cycleHeatmapAvg: 0,
+            theme: localStorage.getItem("hz_theme") || "light",
           };
         },
         computed: {
@@ -1730,7 +2093,7 @@
                 usernameLabel: "Username",
                 passwordLabel: "Password",
                 loginButton: "Sign In",
-                overviewTitle: "✨ Hetzner • Overview",
+                overviewTitle: "✨ Hetzner · Overview",
                 overviewSubtitle: "📊 Real-time traffic, rebuild actions, and DNS checks in one place.",
                 dnsCheck: "DNS Check",
                 logout: "Log Out",
@@ -1763,7 +2126,7 @@
                   "Budget forecast with per-TB cost tracking.",
                   "Tag-based grouping and custom caps.",
                 ],
-                serversTitle: "🖥️ Hetzner • Servers",
+                serversTitle: "🖥️ Hetzner · Servers",
                 serverSearchPlaceholder: "Search name / ID / IP",
                 sortOutboundDesc: "Outbound high to low",
                 sortOutboundAsc: "Outbound low to high",
@@ -1777,12 +2140,12 @@
                 tableLocation: "Location",
                 tableOutbound: "Outbound (TB)",
                 tableInbound: "Inbound (TB)",
-                tableLimit: "Limit / Remaining",
+                tableLimit: "Remaining / Limit (TB)",
                 tableEta: "Cap ETA",
                 tableTrend: "Trend",
                 tableActions: "Actions",
                 rebuild: "Rebuild",
-                trafficTitle: "📡 Hetzner • Outbound / Inbound",
+                trafficTitle: "📡 Hetzner · Outbound / Inbound",
                 hourlyDateLabel: "Hourly date",
                 recent24h: "Last 24 hours",
                 currentDatePrefix: "Current date:",
@@ -1793,8 +2156,9 @@
                 tableDate: "Date",
                 outbound: "Outbound",
                 inbound: "Inbound",
-                trafficBarsTitle: "📊 Traffic bars",
-                trafficBarsHint: "Default shows the last 7 days; scroll to see history.",
+                serverLegend: "",
+              trafficBarsTitle: "📊 Daily traffic bars",
+                trafficBarsHint: "Daily bars per server (latest 7 days in view, scroll for history).",
                 footerNote: "Note: This console uses Basic Auth; access via HTTPS. | build 20260116-01",
                 loginFailed: "Login failed.",
                 networkError: "Network error.",
@@ -1809,6 +2173,8 @@
                 rebuildFailed: "Rebuild failed",
                 rebuildUnknownError: "Unknown error",
                 rebuildStarted: "Rebuild started, new IP: ",
+                themeDark: "Dark mode",
+                themeLight: "Light mode",
                 dayUnit: "days",
                 hourUnit: "hours",
               };
@@ -1821,7 +2187,7 @@
               usernameLabel: "账号",
               passwordLabel: "密码",
               loginButton: "登录",
-              overviewTitle: "✨ Hetzner • 总览",
+              overviewTitle: "✨ Hetzner · 总览",
               overviewSubtitle: "📊 实时流量、重建操作、DNS 检查集中展示。",
               dnsCheck: "DNS 检查",
               logout: "退出",
@@ -1853,7 +2219,7 @@
                 "按 TB 计费的预算预测与成本跟踪。",
                 "按标签分组与自定义流量上限。",
               ],
-              serversTitle: "🖥️ Hetzner • 机器",
+              serversTitle: "🖥️ Hetzner · 机器",
               serverSearchPlaceholder: "搜索名称 / ID / IP",
               sortOutboundDesc: "出站高到低",
               sortOutboundAsc: "出站低到高",
@@ -1867,12 +2233,12 @@
               tableLocation: "机房",
               tableOutbound: "出站（TB）",
               tableInbound: "入站（TB）",
-              tableLimit: "阈值/剩余",
+              tableLimit: "剩余/阈值 (TB)",
               tableEta: "触顶 ETA",
               tableTrend: "趋势",
               tableActions: "操作",
               rebuild: "重建",
-              trafficTitle: "📡 Hetzner • 出站/入站",
+              trafficTitle: "📡 Hetzner · 数据",
               hourlyDateLabel: "小时数据日期",
               recent24h: "最近24小时",
               currentDatePrefix: "当前日期：",
@@ -1883,25 +2249,31 @@
               tableDate: "日期",
               outbound: "出站",
               inbound: "入站",
-              trafficBarsTitle: "📊 流量柱子",
-              trafficBarsHint: "默认展示近 7 天，可左右滚动查看历史。",
-              footerNote: "提示：此控制台使用 Basic Auth，建议通过 HTTPS 访问。| build 20260116-01",
-              loginFailed: "登录失败。",
-              networkError: "网络错误。",
-              loadServersFailed: "加载服务器失败。",
-              dnsCheckFailed: "DNS 检查失败。",
-              dnsMissingMap: "缺少映射",
-              dnsError: "错误",
-              dnsMismatch: "不匹配",
-              dnsOk: "OK",
-              dnsExpected: "期望",
-              rebuildConfirm: "确定立即重建该服务器？",
-              rebuildFailed: "重建失败",
-              rebuildUnknownError: "未知错误",
-              rebuildStarted: "重建已开始，新 IP: ",
-              dayUnit: "天",
-              hourUnit: "小时",
-            };
+              serverLegend: "",
+              trafficBarsTitle: "📊 每日流量柱子",
+              trafficBarsHint: "按天展示每台服务器（默认显示最新 7 天，可左右滚动）。",
+              footerNote: "提示：此控制台使用 Basic Auth，建议通过 HTTPS 访问。| build 20260116-01 By__22号仔Stringer🫧",
+                loginFailed: "登录失败。",
+                networkError: "网络错误。",
+                loadServersFailed: "加载服务器失败。",
+                dnsCheckFailed: "DNS 检查失败。",
+                dnsMissingMap: "缺少映射",
+                dnsError: "错误",
+                dnsMismatch: "不匹配",
+                dnsOk: "OK",
+                dnsExpected: "期望",
+                rebuildConfirm: "确定立即重建该服务器？",
+                rebuildFailed: "重建失败",
+                rebuildUnknownError: "未知错误",
+                rebuildStarted: "重建已开始，新 IP: ",
+                themeDark: "夜间模式",
+                themeLight: "日间模式",
+                dayUnit: "天",
+                hourUnit: "小时",
+              };
+          },
+          themeToggleText() {
+            return this.theme === "dark" ? this.langPack.themeLight : this.langPack.themeDark;
           },
           hourlyDateDisplay() {
             if (this.hourlyDate) {
@@ -1972,6 +2344,14 @@
           formatDurationDays(days) {
             if (days === null || !Number.isFinite(days)) return "—";
             return `${days.toFixed(1)} ${this.langPack.dayUnit}`;
+          },
+          applyTheme() {
+            document.body.classList.toggle("theme-dark", this.theme === "dark");
+          },
+          toggleTheme() {
+            this.theme = this.theme === "dark" ? "light" : "dark";
+            localStorage.setItem("hz_theme", this.theme);
+            this.applyTheme();
           },
           authHeader() {
             return {
@@ -2201,6 +2581,11 @@
           async login() {
             this.error = "";
             try {
+              if (this.demoMode) {
+                this.authed = true;
+                await this.refresh();
+                return;
+              }
               const res = await fetch("/api/servers", { headers: this.authHeader() });
               if (!res.ok) {
                 this.error = this.langPack.loginFailed;
@@ -2219,12 +2604,17 @@
             this.password = "";
           },
           async refresh() {
-            const res = await fetch("/api/servers", { headers: this.authHeader() });
-            if (!res.ok) {
-              this.error = this.langPack.loadServersFailed;
-              return;
+            let data;
+            if (this.demoMode) {
+              data = this._mockServersPayload();
+            } else {
+              const res = await fetch("/api/servers", { headers: this.authHeader() });
+              if (!res.ok) {
+                this.error = this.langPack.loadServersFailed;
+                return;
+              }
+              data = await res.json();
             }
-            const data = await res.json();
             this.servers = data.servers || [];
             this.updatedAt = data.updated_at || "";
             const traffic = data.traffic || {};
@@ -2272,10 +2662,15 @@
             await this.fetchDaily();
           },
           async fetchHourly() {
-            const query = this.hourlyDate ? `?date=${encodeURIComponent(this.hourlyDate)}` : "";
-            const res = await fetch(`/api/hourly${query}`, { headers: this.authHeader() });
-            if (!res.ok) return;
-            const data = await res.json();
+            let data;
+            if (this.demoMode) {
+              data = this._mockHourlyPayload();
+            } else {
+              const query = this.hourlyDate ? `?date=${encodeURIComponent(this.hourlyDate)}` : "";
+              const res = await fetch(`/api/hourly${query}`, { headers: this.authHeader() });
+              if (!res.ok) return;
+              data = await res.json();
+            }
             const allHourKeys = data.hours || [];
             const startKey = this.trackingStart || "";
             const filteredHourKeys = startKey
@@ -2569,9 +2964,14 @@
             this.hourlyAvgIn = toTiB(avgIn).toFixed(3);
           },
           async fetchDaily() {
-            const res = await fetch("/api/daily", { headers: this.authHeader() });
-            if (!res.ok) return;
-            const data = await res.json();
+            let data;
+            if (this.demoMode) {
+              data = this._mockDailyPayload();
+            } else {
+              const res = await fetch("/api/daily", { headers: this.authHeader() });
+              if (!res.ok) return;
+              data = await res.json();
+            }
             const days = this._withDemoDays(data.days || []);
             const dailyServers = (data.servers || []).map((srv) => ({
               id: srv.id,
@@ -2602,23 +3002,43 @@
               const known = new Set(dailyOptions.map((srv) => srv.id));
               this.dailySelectedIds = this.dailySelectedIds.filter((id) => known.has(id));
             }
-            const stackDays = days.slice(-7);
-            const maxStack = Math.max(
-              ...stackDays.map((d) => Math.max(parseFloat(d.outbound_tb || 0), parseFloat(d.inbound_tb || 0))),
+            const selectedDaily = dailyServers.filter((srv) => this.dailySelectedIds.includes(srv.id));
+            const barServers = selectedDaily.length ? selectedDaily : dailyServers;
+            this.dailyStackServers = barServers.map((srv) => ({
+              id: srv.id,
+              name: srv.name || srv.id,
+            }));
+            const barDays = days.map((day) => {
+              const servers = barServers.map((srv) => {
+                const row = (srv.days || []).find((d) => d.date === day.date);
+                const out = parseFloat(row?.outbound_tb || 0);
+                const inn = parseFloat(row?.inbound_tb || 0);
+                return { id: srv.id, name: srv.name || srv.id, out, in: inn };
+              });
+              return { date: day.date, label: day.date.slice(5), servers };
+            });
+            const maxBar = Math.max(
+              ...barDays.flatMap((day) => day.servers.map((srv) => Math.max(srv.out, srv.in))),
               0.01
             );
-            this.dailyStackDays = stackDays.map((d) => {
-              const out = parseFloat(d.outbound_tb || 0);
-              const inn = parseFloat(d.inbound_tb || 0);
-              return {
-                date: d.date,
-                out: out.toFixed(3),
-                in: inn.toFixed(3),
-                outPct: Math.min(100, (out / maxStack) * 100),
-                inPct: Math.min(100, (inn / maxStack) * 100),
-              };
+            this.dailyStackDays = barDays.map((day) => ({
+              date: day.date,
+              label: day.label,
+              servers: day.servers.map((srv) => ({
+                id: srv.id,
+                name: srv.name,
+                out: srv.out.toFixed(3),
+                in: srv.in.toFixed(3),
+                outPct: Math.min(100, (srv.out / maxBar) * 100),
+                inPct: Math.min(100, (srv.in / maxBar) * 100),
+              })),
+            }));
+            this.$nextTick(() => {
+              const el = this.$refs.dailyStackChart;
+              if (el) {
+                el.scrollLeft = el.scrollWidth;
+              }
             });
-            const selectedDaily = dailyServers.filter((srv) => this.dailySelectedIds.includes(srv.id));
             const matrixDays = days.slice(-14);
             const dayKeys = matrixDays.map((d) => d.date);
             const dailyMatrix = {
@@ -2734,12 +3154,14 @@
             const yesterdayKey = this.formatDateKey(yesterdayDate);
             const todayRow = dayMap.get(todayKey) || days[days.length - 1];
             const yesterdayRow = dayMap.get(yesterdayKey);
-            const todayOut = todayRow ? parseFloat(todayRow.outbound_tb || 0) : 0;
+            const todayOutDaily = todayRow ? parseFloat(todayRow.outbound_tb || 0) : 0;
             const todayIn = todayRow ? parseFloat(todayRow.inbound_tb || 0) : 0;
             const yesterdayOut = yesterdayRow ? parseFloat(yesterdayRow.outbound_tb || 0) : 0;
             const yesterdayIn = yesterdayRow ? parseFloat(yesterdayRow.inbound_tb || 0) : 0;
             this.yesterdayOutboundTb = yesterdayRow ? yesterdayOut.toFixed(3) : "—";
             this.yesterdayInboundTb = yesterdayRow ? yesterdayIn.toFixed(3) : "—";
+            const todayOutDisplay = parseFloat(this.todayOutboundTb || "NaN");
+            const todayOut = Number.isFinite(todayOutDisplay) ? todayOutDisplay : todayOutDaily;
             const deltaOut = todayOut - yesterdayOut;
             const deltaStr = `${deltaOut >= 0 ? "+" : ""}${deltaOut.toFixed(3)}`;
             this.dayDeltaTb = yesterdayRow ? deltaStr : "—";
@@ -2808,6 +3230,87 @@
                 eta_display: `${this.formatDurationDays(etaDays)} (${this.formatDate(etaDate)})`,
               };
             });
+          },
+          _mockServersPayload() {
+            const updated = new Date().toISOString().slice(0, 19).replace("T", " ");
+            return {
+              servers: [
+                {
+                  id: 117712568,
+                  name: "cx43-1",
+                  status: "running",
+                  ip: "91.99.62.126",
+                  server_type: "cx43",
+                  location: "nbg1",
+                  outbound_tb: "6.732",
+                  inbound_tb: "2.431",
+                },
+                {
+                  id: 117712569,
+                  name: "cx43-2",
+                  status: "running",
+                  ip: "46.224.217.154",
+                  server_type: "cx43",
+                  location: "nbg1",
+                  outbound_tb: "10.634",
+                  inbound_tb: "5.538",
+                },
+              ],
+              updated_at: updated,
+              tracking: { start: "2026-01-14 00:00", outbound_tb: "17.366", inbound_tb: "7.969" },
+              traffic: { limit_gb: 18432, limit_tb: "18.000", cost_per_tb_eur: 1 },
+              rebuilds: { "117712568": "2026-01-16 12:30:00" },
+            };
+          },
+          _mockHourlyPayload() {
+            const hours = [];
+            const servers = {
+              "117712568": { name: "cx43-1", deltas: [] },
+              "117712569": { name: "cx43-2", deltas: [] },
+            };
+            const now = new Date();
+            for (let i = 23; i >= 0; i -= 1) {
+              const d = new Date(now);
+              d.setHours(now.getHours() - i, 0, 0, 0);
+              const key = d.toISOString().slice(0, 16).replace("T", " ");
+              hours.push(key);
+              const base = 0.18 + Math.sin(i / 3) * 0.06;
+              const base2 = 0.26 + Math.cos(i / 4) * 0.08;
+              servers["117712568"].deltas.push({
+                tb: (base + (i % 3) * 0.02).toFixed(3),
+                in_tb: (base * 0.45).toFixed(3),
+              });
+              servers["117712569"].deltas.push({
+                tb: (base2 + (i % 4) * 0.03).toFixed(3),
+                in_tb: (base2 * 0.5).toFixed(3),
+              });
+            }
+            return { hours, servers };
+          },
+          _mockDailyPayload() {
+            const days = [];
+            const servers = [
+              { id: 117712568, name: "cx43-1", days: [] },
+              { id: 117712569, name: "cx43-2", days: [] },
+            ];
+            const now = new Date();
+            for (let i = 6; i >= 0; i -= 1) {
+              const d = new Date(now);
+              d.setDate(now.getDate() - i);
+              const date = d.toISOString().slice(0, 10);
+              const out1 = (0.82 + Math.sin(i / 2) * 0.3).toFixed(3);
+              const in1 = (0.45 + Math.cos(i / 3) * 0.15).toFixed(3);
+              const out2 = (1.25 + Math.cos(i / 2.5) * 0.35).toFixed(3);
+              const in2 = (0.62 + Math.sin(i / 2.8) * 0.2).toFixed(3);
+              days.push({
+                date,
+                outbound_tb: (parseFloat(out1) + parseFloat(out2)).toFixed(3),
+                inbound_tb: (parseFloat(in1) + parseFloat(in2)).toFixed(3),
+              });
+              servers[0].days.push({ date, outbound_tb: out1, inbound_tb: in1 });
+              servers[1].days.push({ date, outbound_tb: out2, inbound_tb: in2 });
+            }
+            return { days, servers };
           },
           async fetchCycle() {
             const res = await fetch("/api/cycle", { headers: this.authHeader() });
@@ -3153,6 +3656,7 @@
         },
         mounted() {
           this.updateTitle();
+          this.applyTheme();
           if (this.username && this.password) {
             this.login();
           }
