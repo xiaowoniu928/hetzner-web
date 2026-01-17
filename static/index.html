@@ -1,0 +1,2891 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Hetzner 流量控制台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f9f7ff;
+        --bg-2: #efe6ff;
+        --card: rgba(255, 255, 255, 0.9);
+        --border: rgba(122, 85, 190, 0.22);
+        --text: #1b1330;
+        --muted: #4f3d6a;
+        --accent: #6f3ef5;
+        --accent-2: #8a62f8;
+        --danger: #ff4d5a;
+        --warning: #ffd166;
+        --mono: "DM Mono", "Fira Mono", monospace;
+        --sans: "Noto Sans SC", "Nunito", "Manrope", system-ui, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background: radial-gradient(1200px 800px at 8% 10%, #e3d4ff, transparent),
+          radial-gradient(900px 700px at 92% 12%, #d7c1ff, transparent),
+          linear-gradient(140deg, #faf7ff, #ebe2ff 50%, #f8f4ff);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 20px 80px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 18px;
+        padding: 32px 28px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(124, 77, 255, 0.18), rgba(183, 148, 246, 0.12));
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: -120px;
+        top: -120px;
+        width: 260px;
+        height: 260px;
+        background: radial-gradient(circle, rgba(124, 77, 255, 0.35), transparent 70%);
+        filter: blur(6px);
+        opacity: 0.8;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(28px, 4vw, 42px);
+        letter-spacing: -0.02em;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-top: 8px;
+      }
+
+      .btn {
+        border: 1px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+        padding: 10px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .btn.accent {
+        background: linear-gradient(135deg, rgba(124, 77, 255, 0.25), rgba(171, 126, 255, 0.35));
+        border-color: rgba(124, 77, 255, 0.5);
+      }
+
+      .btn.danger {
+        background: rgba(255, 92, 92, 0.16);
+        border-color: rgba(255, 92, 92, 0.6);
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+        margin-top: 24px;
+      }
+
+      .grid-3 {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .grid-2 {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+
+      .grid-2-1 {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        align-items: start;
+      }
+
+      .cycle-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        align-items: stretch;
+      }
+
+      .cycle-overview {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .cycle-server-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-bottom: 18px;
+      }
+
+      .cycle-server-card {
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(124, 77, 255, 0.2);
+        background: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+
+      .cycle-server-card.active {
+        border-color: rgba(124, 77, 255, 0.6);
+        box-shadow: 0 10px 24px rgba(124, 77, 255, 0.12);
+        transform: translateY(-1px);
+      }
+
+      .cycle-metric {
+        font-size: clamp(30px, 4vw, 44px);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      .cycle-gauge {
+        display: grid;
+        gap: 10px;
+      }
+
+      .gauge-bar {
+        position: relative;
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(124, 77, 255, 0.12);
+        overflow: hidden;
+      }
+
+      .gauge-fill {
+        height: 100%;
+        border-radius: 999px;
+        transition: width 0.3s ease;
+      }
+
+      .gauge-mark {
+        position: absolute;
+        top: -5px;
+        width: 2px;
+        height: 22px;
+        background: rgba(60, 40, 90, 0.3);
+      }
+
+      .gauge-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .eta-card {
+        display: grid;
+        gap: 10px;
+      }
+
+      .eta-chart {
+        height: 120px;
+      }
+
+      .cycle-chart-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin: 6px 0 10px;
+      }
+
+      .cycle-chart-title span {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .heatmap-wrap {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 10px;
+        align-items: start;
+      }
+
+      .heatmap-y {
+        display: grid;
+        grid-template-rows: repeat(24, 1fr);
+        gap: 2px;
+        font-size: 10px;
+        color: var(--muted);
+      }
+
+      .heatmap-grid {
+        display: grid;
+        gap: 2px;
+        align-items: stretch;
+      }
+
+      .heatmap-cell {
+        width: 100%;
+        min-height: 10px;
+        border-radius: 2px;
+      }
+
+      .heatmap-x {
+        margin-top: 8px;
+        display: grid;
+        gap: 2px;
+        font-size: 10px;
+        color: var(--muted);
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 10px 30px rgba(64, 45, 110, 0.08);
+      }
+
+      .card h3 {
+        margin: 0 0 10px;
+        font-size: 22px;
+        letter-spacing: -0.01em;
+        color: #3b2a64;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .pill {
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      .table thead th {
+        background: rgba(124, 77, 255, 0.12);
+      }
+
+      .table th,
+      .table td {
+        padding: 8px 10px;
+        text-align: left;
+        border-bottom: 1px solid rgba(124, 77, 255, 0.12);
+        vertical-align: middle;
+      }
+
+      .table th {
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .table tbody tr:hover {
+        background: rgba(124, 77, 255, 0.08);
+      }
+
+      .table-wrap {
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid rgba(122, 85, 190, 0.22);
+        background: rgba(255, 255, 255, 0.75);
+      }
+      .table th.group {
+        text-align: center;
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .table th.sub {
+        font-size: 13px;
+        color: var(--muted);
+        text-align: center;
+      }
+      .table td.sub {
+        text-align: center;
+      }
+      .table .divider {
+        border-left: 2px solid rgba(122, 85, 190, 0.18);
+      }
+
+      .mono {
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+
+      .clickable {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .sticky-col {
+        position: sticky;
+        left: 0;
+        background: var(--card);
+        z-index: 2;
+      }
+
+      .sticky-col.header {
+        z-index: 3;
+      }
+
+      .sticky-col.date {
+        min-width: 110px;
+      }
+
+      .sticky-col.time {
+        left: 110px;
+        min-width: 70px;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+      .delta-up {
+        color: #16a34a;
+        font-weight: 600;
+      }
+      .delta-down {
+        color: #ef4444;
+        font-weight: 600;
+      }
+
+      .login {
+        max-width: 380px;
+        margin: 60px auto;
+      }
+
+      .field {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .field input {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.25);
+        color: var(--text);
+      }
+
+      .hourly {
+        display: grid;
+        gap: 12px;
+        font-size: 13px;
+      }
+
+      .metric {
+        font-size: 26px;
+        font-weight: 600;
+        margin-top: 6px;
+      }
+
+      .metric small {
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .chart-wrap {
+        margin-top: 12px;
+      }
+
+      .chart {
+        height: 220px;
+        margin-top: 14px;
+        padding: 14px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(250, 247, 255, 0.9), rgba(239, 230, 255, 0.95));
+        border: 1px solid rgba(123, 92, 200, 0.2);
+      }
+
+      .chart.scroll-x {
+        overflow-x: auto;
+      }
+
+      .chart.scroll-x svg {
+        min-width: 100%;
+        display: block;
+      }
+
+      .chart.compact {
+        height: 180px;
+      }
+
+      .chart.hourly {
+        height: 240px;
+        margin-top: 10px;
+        padding: 18px 18px 14px;
+        background: #fdfbf6;
+        border: 1px solid rgba(211, 201, 187, 0.7);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+      }
+
+      .chart svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .chart-axis {
+        stroke: rgba(59, 38, 88, 0.2);
+        stroke-width: 1;
+      }
+
+      .chart-axis.dashed {
+        stroke-dasharray: 6 6;
+        opacity: 0.7;
+      }
+
+      .chart-line {
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        filter: drop-shadow(0 0 6px rgba(124, 77, 255, 0.25));
+      }
+
+      .chart-area {
+        opacity: 0.25;
+      }
+
+      .chart-point {
+        fill: #14b8a6;
+        stroke: #f6f1ff;
+        stroke-width: 2;
+      }
+
+      .chart-point.out {
+        fill: #7c3aed;
+      }
+
+      .chart-point.in {
+        fill: #14b8a6;
+      }
+
+      .chart-point-label {
+        font-size: 11px;
+        font-family: var(--mono);
+        text-anchor: middle;
+        paint-order: stroke;
+        stroke: rgba(255, 255, 255, 0.7);
+        stroke-width: 3;
+      }
+
+      .chart-point-label.out {
+        fill: #5b21b6;
+      }
+
+      .chart-point-label.in {
+        fill: #0f766e;
+      }
+
+      .chart-point-label.server {
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .chart-point.server {
+        stroke: #f6f1ff;
+        stroke-width: 1.8;
+      }
+
+      .chart-point-group.server {
+        cursor: pointer;
+      }
+
+      .chart-point-group.server:hover .chart-point-label.server {
+        opacity: 1;
+      }
+
+      .chart-point-label.server.visible {
+        opacity: 1;
+      }
+
+      .chart-bar {
+        fill: rgba(124, 77, 255, 0.45);
+        stroke: rgba(124, 77, 255, 0.65);
+        stroke-width: 0.5;
+        rx: 3;
+      }
+
+      .chart-bar-label {
+        fill: rgba(54, 40, 78, 0.85);
+        font-size: 10px;
+        text-anchor: middle;
+        font-family: var(--mono);
+      }
+
+      .chart-bar-time {
+        fill: rgba(54, 40, 78, 0.7);
+        font-size: 10px;
+        text-anchor: middle;
+        font-family: var(--mono);
+      }
+
+      .chart-line.dashed {
+        stroke-dasharray: 6 6;
+        opacity: 0.85;
+      }
+
+      .chart-line.server {
+        stroke-width: 1.6;
+        opacity: 0.55;
+      }
+
+      .chart-line.alt {
+        stroke: #06b6d4;
+        filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.25));
+      }
+
+      .chart-line.multi {
+        stroke-width: 2.2;
+        filter: drop-shadow(0 0 6px rgba(72, 56, 120, 0.15));
+      }
+
+      .chart-line.base {
+        opacity: 0.5;
+        stroke-dasharray: 4 6;
+      }
+
+      .chart-grid line {
+        stroke: rgba(68, 48, 110, 0.3);
+        stroke-width: 1;
+      }
+
+      .chart.hourly .chart-grid line {
+        stroke: rgba(160, 160, 160, 0.35);
+      }
+
+      .chart.hourly .chart-axis {
+        stroke: rgba(160, 160, 160, 0.5);
+      }
+
+      .chart.hourly .chart-axis-label {
+        fill: rgba(95, 95, 95, 0.9);
+      }
+
+      .chart-axis-label {
+        fill: rgba(54, 40, 78, 0.6);
+        font-size: 12px;
+        font-family: var(--mono);
+      }
+
+      .chart-axis-label.right {
+        text-anchor: end;
+      }
+
+      .chart-axis-label.tick {
+        font-size: 13px;
+        opacity: 1;
+        paint-order: stroke;
+        stroke: rgba(255, 255, 255, 0.7);
+        stroke-width: 3;
+      }
+
+      .candle {
+        stroke-width: 2;
+      }
+
+      .candle.up {
+        stroke: #4bd37b;
+      }
+
+      .candle.down {
+        stroke: #ff7a59;
+      }
+
+      .candle-wick {
+        stroke-width: 1.5;
+        stroke: rgba(77, 64, 105, 0.5);
+      }
+
+      .chart-legend {
+        display: flex;
+        gap: 16px;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        flex-wrap: wrap;
+      }
+
+      .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(122, 85, 190, 0.25);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .legend-item.active {
+        border-color: rgba(124, 77, 255, 0.7);
+        background: rgba(124, 77, 255, 0.12);
+        color: var(--text);
+      }
+
+      .legend-item.inactive {
+        opacity: 0.4;
+      }
+
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+      }
+
+      .legend-dot.line {
+        width: 12px;
+        height: 3px;
+        border-radius: 999px;
+        margin-right: 6px;
+      }
+
+      .dashboard-card {
+        padding: 24px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(210, 198, 178, 0.65);
+        box-shadow: 0 14px 28px rgba(62, 52, 39, 0.12);
+      }
+
+      .title-with-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .trend-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 22px;
+        letter-spacing: -0.01em;
+      }
+
+      .trend-icon {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        border: 2px solid rgba(59, 82, 69, 0.7);
+        position: relative;
+      }
+
+      .trend-icon::after {
+        content: "";
+        position: absolute;
+        left: 2px;
+        top: 7px;
+        width: 10px;
+        height: 2px;
+        background: linear-gradient(90deg, #3ba776, #f2a65a);
+        transform: rotate(-20deg);
+      }
+
+      .dashboard-chart {
+        height: 250px;
+        padding: 22px;
+        margin-top: 16px;
+        background: #fdfbf6;
+        border: 1px solid rgba(211, 201, 187, 0.7);
+        border-radius: 14px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+      }
+
+      .dashboard-chart .chart-grid line {
+        stroke: rgba(160, 160, 160, 0.35);
+      }
+
+      .dashboard-chart .chart-axis {
+        stroke: rgba(160, 160, 160, 0.5);
+      }
+
+      .dashboard-chart .chart-axis-label {
+        fill: rgba(95, 95, 95, 0.9);
+        font-family: "Noto Sans SC", var(--sans);
+        font-size: 11px;
+      }
+
+      .dashboard-chart .chart-axis-label.tick {
+        stroke: rgba(255, 255, 255, 0.6);
+      }
+
+      .dashboard-chart .chart-point.out {
+        fill: #3ba776;
+      }
+
+      .dashboard-chart .chart-point.in {
+        fill: #f2a65a;
+      }
+
+      .dashboard-chart .chart-point-label.out {
+        fill: #2d6a4f;
+      }
+
+      .dashboard-chart .chart-point-label.in {
+        fill: #b45309;
+      }
+
+      .dashboard-card .legend-item.active,
+      .hourly-card .legend-item.active {
+        border-color: rgba(178, 165, 146, 0.7);
+        background: rgba(255, 255, 255, 0.7);
+        color: rgba(52, 52, 52, 0.9);
+      }
+
+      .legend-out {
+        background: #3ba776;
+      }
+
+      .legend-in {
+        background: #f2a65a;
+      }
+
+      .placeholder {
+        color: var(--muted);
+        font-size: 13px;
+        padding: 16px;
+        border: 1px dashed rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .bars {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .bar-label {
+        font-family: var(--mono);
+        color: var(--muted);
+      }
+      .bar-values {
+        text-align: right;
+        font-family: var(--mono);
+        color: var(--muted);
+      }
+      .stack-chart {
+        margin-top: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+      .stack-bars {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(40px, 1fr);
+        gap: 12px;
+        align-items: end;
+        height: 220px;
+        padding: 10px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(122, 85, 190, 0.18);
+        width: max-content;
+        min-width: 100%;
+      }
+      .stack-day {
+        display: grid;
+        gap: 6px;
+        justify-items: center;
+        font-size: 11px;
+      }
+      .stack-bars .bar {
+        width: 16px;
+        border-radius: 6px 6px 4px 4px;
+      }
+      .stack-bar-box {
+        height: 160px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 6px;
+        width: 100%;
+      }
+      .stack-bar-box .bar {
+        width: 14px;
+      }
+      .bar-out {
+        background: linear-gradient(180deg, #7c4dff, #b794f6);
+      }
+      .bar-in {
+        background: linear-gradient(180deg, #14b8a6, #67e8f9);
+        opacity: 0.85;
+      }
+      .stack-legend {
+        display: flex;
+        gap: 12px;
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .stack-legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .stack-legend i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+      }
+
+      .bar-track {
+        flex: 1;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(124, 77, 255, 0.12);
+        overflow: hidden;
+      }
+
+      .bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #7c4dff, #b794f6);
+        width: 0%;
+      }
+
+      .log-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+        font-size: 12px;
+      }
+
+      .log-item {
+        padding: 10px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .chart-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .chart-note {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 6px;
+      }
+
+      .breakdown-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        margin-top: 8px;
+      }
+
+      .breakdown-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: rgba(124, 77, 255, 0.08);
+        border: 1px solid rgba(122, 85, 190, 0.18);
+        font-size: 12px;
+      }
+
+      .breakdown-item strong {
+        font-weight: 600;
+      }
+
+      .selector {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 10px 0 6px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(122, 85, 190, 0.3);
+        background: rgba(124, 77, 255, 0.08);
+        font-size: 12px;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .chip.active {
+        background: rgba(34, 197, 94, 0.12);
+        border-color: rgba(34, 197, 94, 0.4);
+      }
+
+      .chip-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 8px;
+        margin: 10px 0 6px;
+      }
+
+      .tab {
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(122, 85, 190, 0.3);
+        background: rgba(124, 77, 255, 0.08);
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .tab.active {
+        background: rgba(34, 197, 94, 0.12);
+        border-color: rgba(34, 197, 94, 0.4);
+      }
+
+      .date-input {
+        padding: 6px 10px;
+        border-radius: 8px;
+        border: 1px solid rgba(122, 85, 190, 0.3);
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--text);
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+
+      .table-filter {
+        padding: 6px 10px;
+        border-radius: 8px;
+        border: 1px solid rgba(122, 85, 190, 0.3);
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--text);
+        font-size: 12px;
+      }
+
+      .detail-grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .detail-block {
+        display: grid;
+        gap: 12px;
+      }
+
+      .detail-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #3b2a64;
+        margin-bottom: 6px;
+      }
+
+      .detail-card {
+        background: rgba(255, 255, 255, 0.76);
+        border: 1px solid rgba(122, 85, 190, 0.12);
+        border-radius: 14px;
+        padding: 14px;
+      }
+
+      .hourly-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .hourly-meta {
+        display: grid;
+        gap: 4px;
+      }
+
+      .hourly-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .hourly-badge {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        border: 1px solid rgba(82, 99, 138, 0.2);
+        background: rgba(255, 255, 255, 0.7);
+        color: rgba(41, 50, 74, 0.9);
+      }
+
+      .hourly-badge strong {
+        font-size: 14px;
+      }
+
+      .hourly-badge.out {
+        border-color: rgba(59, 167, 118, 0.45);
+        background: rgba(59, 167, 118, 0.12);
+      }
+
+      .hourly-badge.in {
+        border-color: rgba(242, 166, 90, 0.5);
+        background: rgba(242, 166, 90, 0.12);
+      }
+
+      .matrix-wrap {
+        overflow-x: auto;
+      }
+
+      .scroll-box {
+        max-height: 360px;
+        overflow: auto;
+      }
+
+      .compact-table th,
+      .compact-table td {
+        padding: 6px 6px;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+      .spark {
+        width: 120px;
+        height: 32px;
+      }
+
+      .spark svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .spark-line {
+        fill: none;
+        stroke-width: 2;
+      }
+
+      .hour-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .hour-tag {
+        padding: 4px 8px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        font-family: var(--mono);
+      }
+
+      .footer {
+        margin-top: 24px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .hero-metrics {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+
+      .hero-metric {
+        padding: 14px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(122, 85, 190, 0.2);
+      }
+
+      .hero-metric .metric {
+        margin-top: 4px;
+        font-size: 24px;
+      }
+
+      @media (max-width: 860px) {
+        .hero {
+          padding: 24px 20px;
+        }
+        .table {
+          font-size: 13px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .container {
+          padding: 20px 14px 60px;
+        }
+        .hero {
+          width: 100%;
+          margin: 0;
+          min-width: 0;
+          padding: 14px;
+          border-radius: 14px;
+          background: var(--card);
+          border: 1px solid var(--border);
+          box-shadow: 0 10px 30px rgba(64, 45, 110, 0.08);
+          min-height: auto;
+          align-content: start;
+          gap: 12px;
+        }
+        .hero::after {
+          display: none;
+        }
+        h1 {
+          font-size: 26px;
+        }
+        .subtitle {
+          font-size: 13px;
+        }
+        .toolbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .toolbar .status {
+          justify-content: space-between;
+          width: 100%;
+        }
+        .btn {
+          width: 100%;
+          text-align: center;
+        }
+        .grid-3,
+        .grid-2,
+        .grid-2-1 {
+          grid-template-columns: 1fr;
+        }
+        .card {
+          padding: 14px;
+          border-radius: 14px;
+        }
+        .card h3 {
+          font-size: 20px;
+        }
+        .detail-title {
+          font-size: 15px;
+        }
+        .metric {
+          font-size: 22px;
+        }
+        .hero-metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .hero-metric {
+          padding: 12px;
+        }
+        .hero-metric .metric {
+          font-size: 20px;
+        }
+        .table-wrap {
+          overflow-x: auto;
+        }
+        .table {
+          min-width: 720px;
+          font-size: 12px;
+        }
+        .table th,
+        .table td {
+          padding: 6px 6px;
+        }
+        .detail-card {
+          padding: 12px;
+        }
+        .chart {
+          height: 180px;
+          padding: 10px;
+        }
+        .chart.compact,
+        .chart.hourly {
+          height: 190px;
+        }
+        .chart-labels {
+          font-size: 11px;
+        }
+        .selector,
+        .tabs {
+          gap: 6px;
+        }
+        .chip,
+        .tab {
+          font-size: 11px;
+        }
+        .spark {
+          width: 90px;
+        }
+        .footer {
+          font-size: 11px;
+        }
+      }
+
+      @media (max-width: 420px) {
+        .hero-metrics {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="container">
+      <div v-if="!authed" class="login card">
+        <h1>Hetzner 控制台</h1>
+        <p class="subtitle">使用账号登录以管理服务器。</p>
+        <div class="field">
+          <label>账号</label>
+          <input v-model="username" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label>密码</label>
+          <input type="password" v-model="password" autocomplete="current-password" />
+        </div>
+        <button class="btn accent" @click="login">登录</button>
+        <p v-if="error" class="muted">{{ error }}</p>
+      </div>
+
+      <template v-else>
+        <section class="grid">
+          <div class="card">
+            <h3 class="title-with-icon">✨ Hetzner • 总览</h3>
+            <div class="subtitle">📊 实时流量、重建操作、DNS 检查集中展示。</div>
+            <div class="toolbar">
+              <button class="btn" @click="dnsCheck()">DNS 检查</button>
+              <button class="btn danger" @click="logout">退出</button>
+              <div class="status">
+                <span class="pill">更新时间</span>
+                <span>{{ updatedAt || "—" }}</span>
+              </div>
+            </div>
+            <div class="hero-metrics">
+              <div class="hero-metric">
+                <div class="status">📤 周期累计出站</div>
+                <div class="metric">{{ trackingOutboundTb || totalOutboundTb }} <small>TB</small></div>
+                <div class="muted">起点 {{ trackingStart || "—" }}</div>
+              </div>
+              <div class="hero-metric">
+                <div class="status">📥 周期累计入站</div>
+                <div class="metric">{{ trackingInboundTb || totalInboundTb }} <small>TB</small></div>
+                <div class="muted">起点 {{ trackingStart || "—" }}</div>
+              </div>
+              <div class="hero-metric">
+                <div class="status">📈 当天累计出站</div>
+                <div class="metric">{{ todayOutboundTb }} <small>TB</small></div>
+              </div>
+              <div class="hero-metric">
+                <div class="status">📉 当天累计入站</div>
+                <div class="metric">{{ todayInboundTb }} <small>TB</small></div>
+              </div>
+            </div>
+            <div class="hero-metrics">
+              <div class="hero-metric">
+                <div class="status">🧭 今日 vs 昨日出站</div>
+                <div class="metric">{{ todayOutboundTb }} <small>TB</small></div>
+                <div class="muted">
+                  昨日 {{ yesterdayOutboundTb }} TB · 变化
+                  <span :class="dayDeltaClass">{{ dayDeltaTb }} TB ({{ dayDeltaPct }})</span>
+                </div>
+              </div>
+              <div class="hero-metric">
+                <div class="status">🗓️ 本月累计出站</div>
+                <div class="metric">{{ monthOutboundTb }} <small>TB</small></div>
+                <div class="muted">本月日均 {{ monthDailyAvgTb }} TB</div>
+                <div class="muted">峰值 {{ monthPeakTb }} TB（{{ monthPeakDay || "—" }}）</div>
+              </div>
+              <div class="hero-metric">
+                <div class="status">♻️ 最近重建</div>
+                <div class="metric">{{ lastRebuildAt || "—" }}</div>
+                <div class="muted">{{ lastRebuildServer || "—" }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="title-with-icon">🖥️ Hetzner • 机器</h3>
+            <div class="toolbar">
+              <input
+                class="table-filter"
+                v-model="serverFilter"
+                placeholder="搜索名称 / ID / IP"
+                @input="() => {}"
+              />
+              <select class="table-filter" v-model="serverSort">
+                <option value="outbound_desc">出站高到低</option>
+                <option value="outbound_asc">出站低到高</option>
+                <option value="eta_asc">触顶更快</option>
+                <option value="eta_desc">触顶更慢</option>
+                <option value="name_asc">名称 A-Z</option>
+                <option value="name_desc">名称 Z-A</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>名称</th>
+                    <th>IP</th>
+                    <th>规格</th>
+                    <th>机房</th>
+                    <th>出站（TB）</th>
+                    <th>入站（TB）</th>
+                    <th>阈值/剩余</th>
+                    <th>触顶 ETA</th>
+                    <th>趋势</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                <tr v-for="s in filteredServers" :key="s.id">
+                    <td>
+                      <div>{{ s.name }}</div>
+                      <div class="mono muted clickable" @click="toggleId(s.id)">{{ displayId(s.id) }}</div>
+                    </td>
+                    <td class="mono clickable" @click="toggleIp(s.ip)">{{ displayIp(s.ip) }}</td>
+                    <td>{{ s.server_type }}</td>
+                    <td>{{ s.location }}</td>
+                    <td>{{ s.outbound_tb }}</td>
+                    <td>{{ s.inbound_tb }}</td>
+                    <td>
+                      {{ trafficLimitTb }} /
+                      {{ Math.max(0, trafficLimitTb - parseFloat(s.outbound_tb || 0)).toFixed(3) }} TB
+                    </td>
+                    <td>{{ s.eta_display || "—" }}</td>
+                    <td>
+                      <div class="spark">
+                        <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                          <path
+                            v-if="serverSpark[s.name]"
+                            class="spark-line"
+                            :style="{ stroke: serverSpark[s.name].color }"
+                            :d="serverSpark[s.name].path"
+                          />
+                        </svg>
+                      </div>
+                    </td>
+                    <td>
+                      <button class="btn" @click="dnsCheck(s.id)">DNS 检查</button>
+                      <button class="btn danger" @click="rebuild(s.id)">重建</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="title-with-icon">📡 Hetzner • 出站/入站</h3>
+            <div class="toolbar">
+              <div class="status">小时数据日期</div>
+              <input class="date-input" type="date" v-model="hourlyDate" @change="fetchHourly" />
+              <button class="btn" @click="clearHourlyDate">最近24小时</button>
+              <div class="muted">{{ hourlyDate ? `当前日期：${hourlyDate}` : "当前：最近24小时" }}</div>
+            </div>
+            <div class="detail-grid">
+              <div class="detail-card">
+              <div class="detail-title title-with-icon">📅 每日出站/入站</div>
+                <div v-if="dailyServerOptions.length === 0" class="muted">暂无数据。</div>
+                <div v-else>
+                  <div class="selector">
+                    <span
+                      v-for="srv in dailyServerOptions"
+                      :key="srv.id"
+                      class="chip"
+                      :class="{ active: dailySelectedIds.includes(srv.id) }"
+                      @click="toggleDailyServer(srv.id)"
+                    >
+                      <span class="chip-dot" :style="{ background: srv.color }"></span>{{ srv.name }}
+                    </span>
+                  </div>
+                  <div v-if="dailyMatrix.rows.length === 0" class="muted">请选择至少一台服务器。</div>
+                  <div v-else class="matrix-wrap scroll-box">
+                    <table class="table compact-table">
+                      <thead>
+                        <tr>
+                          <th>日期</th>
+                          <th v-for="srv in dailyMatrix.servers" :key="srv.id + '-name'" colspan="2" class="group">
+                            {{ srv.name }}
+                          </th>
+                        </tr>
+                        <tr>
+                          <th></th>
+                          <template v-for="srv in dailyMatrix.servers" :key="srv.id + '-cols'">
+                            <th class="sub">出站</th>
+                            <th class="sub divider">入站</th>
+                          </template>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="row in dailyMatrix.rows" :key="row.date">
+                          <td class="mono">{{ row.date }}</td>
+                          <td v-for="(val, idx) in row.outValues" :key="row.date + '-out-' + idx" class="sub">
+                            {{ val }} TB
+                          </td>
+                          <td v-for="(val, idx) in row.inValues" :key="row.date + '-in-' + idx" class="sub divider">
+                            {{ val }} TB
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="detail-card">
+                <div class="detail-title title-with-icon">📊 流量柱子</div>
+                <div class="muted">默认展示近 7 天，可左右滚动查看历史。</div>
+                <div v-if="dailyStackDays.length === 0" class="muted">暂无数据。</div>
+                <div v-else class="stack-chart">
+                  <div class="stack-bars">
+                    <div v-for="d in dailyStackDays" :key="`stack-${d.date}`" class="stack-day">
+                      <div class="stack-values">{{ d.out }} TB / {{ d.in }} TB</div>
+                      <div class="stack-bar-box">
+                        <div class="bar bar-out" :style="{ height: `${d.outPct}%` }"></div>
+                        <div class="bar bar-in" :style="{ height: `${d.inPct}%` }"></div>
+                      </div>
+                      <div class="bar-label">{{ d.date.slice(5) }}</div>
+                    </div>
+                  </div>
+                  <div class="stack-legend">
+                    <span><i style="background:#7c4dff"></i>出站</span>
+                    <span><i style="background:#14b8a6"></i>入站</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+
+        </section>
+
+        <div class="footer">提示：此控制台使用 Basic Auth，建议通过 HTTPS 访问。| build 20260116-01</div>
+      </template>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          return {
+            username: localStorage.getItem("hz_user") || "",
+            password: localStorage.getItem("hz_pass") || "",
+            authed: false,
+            servers: [],
+            serverFilter: "",
+            serverSort: "outbound_desc",
+            hourlySeries: [],
+            hourlyInSeries: [],
+            hourlyLinePath: "",
+            hourlyAreaPath: "",
+            hourlyInLinePath: "",
+            hourlyOutPoints: [],
+            hourlyInPoints: [],
+            hourlyYAxisTicks: [],
+            hourlyLabelStart: "",
+            hourlyLabelMid: "",
+            hourlyLabelEnd: "",
+            hourlyPeak: "0.000",
+            hourlyPeakOutIdx: -1,
+            hourlyPeakInIdx: -1,
+            hourlyPeakOut: "0.000",
+            hourlyPeakIn: "0.000",
+            hourlyAvgOut: "0.000",
+            hourlyAvgIn: "0.000",
+            hourlySvgWidth: "100%",
+            perServerLines: [],
+            hourlyTicks: [],
+            hourlyBreakdown: [],
+            hourlyByServer: [],
+            hourlyMatrix: { servers: [], rows: [] },
+            hourlyTotals: [],
+            hourlyServerOptions: [],
+            hourlySelectedIds: [],
+            hourlyRange: "",
+            hourlySeriesRaw: [],
+            serverSpark: {},
+            bandPeak: "0.000",
+            bandCandles: [],
+            bandScale: {
+              max: "0.000 TB",
+              p75: "0.000 TB",
+              p50: "0.000 TB",
+              p25: "0.000 TB",
+              min: "0.000 TB",
+            },
+            hourlyScale: { max: "0.000 TB", p75: "0.000 TB", p50: "0.000 TB", p25: "0.000 TB" },
+            dailySeries: [],
+            dailyServers: [],
+            dailyMatrix: { servers: [], rows: [] },
+            dailyServerOptions: [],
+            dailySelectedIds: [],
+            dailyStackDays: [],
+            dailyOutPoints: [],
+            dailyInPoints: [],
+            dailyLinePath: "",
+            dailyAreaPath: "",
+            dailyInLinePath: "",
+            dailyInAreaPath: "",
+            dailyTicks: [],
+            dailyYAxisTicks: [],
+            dailyPerServerLines: [],
+            dailyLabelStart: "",
+            dailyLabelMid: "",
+            dailyLabelEnd: "",
+            dailyPeakOutIdx: -1,
+            dailyPeakInIdx: -1,
+            dailyPeak: "0.000",
+            dailyTotal: "0.000",
+            dailyInboundPeak: "0.000",
+            dailyInboundTotal: "0.000",
+            dailyScale: { t15: "15 TiB", t10: "10 TiB", t5: "5 TiB", t0: "0 TiB" },
+            totalOutboundTb: "0.000",
+            totalInboundTb: "0.000",
+            trackingOutboundTb: "",
+            trackingInboundTb: "",
+            trackingStart: "",
+            todayOutboundTb: "0.000",
+            todayInboundTb: "0.000",
+            yesterdayOutboundTb: "0.000",
+            yesterdayInboundTb: "0.000",
+            dayDeltaTb: "0.000",
+            dayDeltaPct: "—",
+            dayDeltaClass: "",
+            monthOutboundTb: "0.000",
+            monthInboundTb: "0.000",
+            monthCostEur: "0.00",
+            monthProjectedTb: "0.000",
+            monthProjectedCostEur: "0.00",
+            monthDailyAvgTb: "0.000",
+            monthPeakTb: "0.000",
+            monthPeakDay: "",
+            trafficLimitTb: 18,
+            costPerTb: 1,
+            budgetRemainingTb: "0.000",
+            budgetEtaDisplay: "—",
+            budgetEtaDate: "",
+            avgDailyOutboundTb: "0.000",
+            etaWindowDays: 7,
+            lastRebuildAt: "",
+            lastRebuildServer: "",
+            rebuildMap: {},
+            peakServer: { name: "", value: "0.000" },
+            updatedAt: "",
+            error: "",
+            hourlyDate: "",
+            revealIpMap: {},
+            revealIdMap: {},
+            dailySvgWidth: "100%",
+            dailyPinnedPoints: {},
+            cycleServers: {},
+            cycleServerSummaries: [],
+            cycleTotalUsedTb: "0.000",
+            cycleTotalRemainingTb: "0.000",
+            cycleTotalBudgetTb: "0.000",
+            cycleEtaWindowHours: 3,
+            cycleCombinedLines: [],
+            cycleCombinedLegend: [],
+            cycleCombinedTicks: [],
+            cycleCombinedSvgWidth: "100%",
+            cycleCombinedLine18Y: 0,
+            cycleCombinedRebuildMarks: [],
+            cycleHeatmapCells: [],
+            cycleHeatmapAgeMax: 72,
+            cycleHeatmapMax: 0,
+            cycleHeatmapMin: 0,
+            cycleHeatmapAvg: 0,
+          };
+        },
+        computed: {
+          filteredServers() {
+            const query = (this.serverFilter || "").toLowerCase().trim();
+            let list = this.servers || [];
+            if (query) {
+              list = list.filter((s) => {
+                const hay = [
+                  s.name,
+                  s.id,
+                  s.ip,
+                  s.server_type,
+                  s.location,
+                ]
+                  .filter(Boolean)
+                  .join(" ")
+                  .toLowerCase();
+                return hay.includes(query);
+              });
+            }
+            const byOutbound = (a, b) =>
+              parseFloat(a.outbound_tb || 0) - parseFloat(b.outbound_tb || 0);
+            const byEta = (a, b) => {
+              const aEta = Number.isFinite(a.eta_days) ? a.eta_days : Number.POSITIVE_INFINITY;
+              const bEta = Number.isFinite(b.eta_days) ? b.eta_days : Number.POSITIVE_INFINITY;
+              return aEta - bEta;
+            };
+            switch (this.serverSort) {
+              case "outbound_asc":
+                return [...list].sort(byOutbound);
+              case "outbound_desc":
+                return [...list].sort((a, b) => byOutbound(b, a));
+              case "eta_asc":
+                return [...list].sort(byEta);
+              case "eta_desc":
+                return [...list].sort((a, b) => byEta(b, a));
+              case "name_desc":
+                return [...list].sort((a, b) => (b.name || "").localeCompare(a.name || ""));
+              case "name_asc":
+              default:
+                return [...list].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+            }
+          },
+          cycleEtaDisplay() {
+            if (this.cycleEtaHours === null || !Number.isFinite(this.cycleEtaHours)) return "—";
+            if (this.cycleEtaHours >= 24) {
+              const days = this.cycleEtaHours / 24;
+              return `${days.toFixed(1)} 天`;
+            }
+            return `${this.cycleEtaHours.toFixed(1)} 小时`;
+          },
+        },
+        methods: {
+          authHeader() {
+            return {
+              Authorization: "Basic " + btoa(this.username + ":" + this.password),
+            };
+          },
+          _withDemoDays(days) {
+            if (!Array.isArray(days)) return days;
+            const params = new URLSearchParams(window.location.search);
+            if (params.get("demo") !== "1") return days;
+            if (days.length >= 14) return days;
+            const base = days.length ? new Date(days[days.length - 1].date) : new Date();
+            const seed = days.length ? days[days.length - 1] : { outbound_tb: "4.200", inbound_tb: "2.100" };
+            const outBase = parseFloat(seed.outbound_tb || 4);
+            const inBase = parseFloat(seed.inbound_tb || 2);
+            const out = [];
+            for (let i = 13; i >= 0; i -= 1) {
+              const d = new Date(base);
+              d.setDate(base.getDate() - i);
+              const wobble = Math.sin(i / 2) * 0.6 + (i % 3) * 0.15;
+              const outVal = Math.max(0.2, outBase * 0.35 + wobble + 0.6);
+              const inVal = Math.max(0.1, inBase * 0.35 + wobble * 0.6 + 0.3);
+              const date = d.toISOString().slice(0, 10);
+              out.push({
+                date,
+                outbound_tb: outVal.toFixed(3),
+                inbound_tb: inVal.toFixed(3),
+              });
+            }
+            return out;
+          },
+          displayIp(ip) {
+            if (!ip) return "—";
+            const key = String(ip);
+            if (this.revealIpMap[key]) return key;
+            return this.maskIp(key);
+          },
+          toggleIp(ip) {
+            if (!ip) return;
+            const key = String(ip);
+            this.revealIpMap = { ...this.revealIpMap, [key]: !this.revealIpMap[key] };
+          },
+          displayId(id) {
+            if (id === undefined || id === null) return "—";
+            const key = String(id);
+            if (this.revealIdMap[key]) return key;
+            return this.maskId(key);
+          },
+          toggleId(id) {
+            if (id === undefined || id === null) return;
+            const key = String(id);
+            this.revealIdMap = { ...this.revealIdMap, [key]: !this.revealIdMap[key] };
+          },
+          maskIp(ip) {
+            if (!ip) return "—";
+            const parts = String(ip).split(".");
+            if (parts.length !== 4) return String(ip);
+            return `${parts[0]}.**.**.${parts[3]}`;
+          },
+          maskId(id) {
+            if (id === undefined || id === null) return "—";
+            const str = String(id);
+            if (str.length <= 4) return "****";
+            return `${str.slice(0, 2)}****${str.slice(-2)}`;
+          },
+          twoDigit(value) {
+            return String(value).padStart(2, "0");
+          },
+          formatDateKey(date) {
+            const year = date.getFullYear();
+            const month = this.twoDigit(date.getMonth() + 1);
+            const day = this.twoDigit(date.getDate());
+            return `${year}-${month}-${day}`;
+          },
+          formatDate(date) {
+            return this.formatDateKey(date);
+          },
+          formatEta(hours) {
+            if (hours === null || !Number.isFinite(hours)) return "—";
+            if (hours >= 24) return `${(hours / 24).toFixed(1)} 天`;
+            return `${hours.toFixed(1)} 小时`;
+          },
+          cycleGaugeColorFor(value) {
+            if (value >= 19) return "#ef4444";
+            if (value >= 18) return "#f97316";
+            if (value >= 14) return "#f59e0b";
+            return "#22c55e";
+          },
+          heatmapColor(value, maxOverride = null) {
+            const max = maxOverride || this.cycleHeatmapMax || 1;
+            const ratio = Math.min(value / max, 1);
+            const hue = 210 - ratio * 70;
+            const light = 86 - ratio * 28;
+            return `hsl(${hue}, 70%, ${light}%)`;
+          },
+          buildCycleLine(points, times, maxY) {
+            const indexMap = new Map(times.map((t, idx) => [t, idx]));
+            let path = "";
+            let started = false;
+            points.forEach((p) => {
+              const idx = indexMap.get(p.time);
+              if (idx === undefined) return;
+              const x = (idx / Math.max(times.length - 1, 1)) * 1000;
+              const y = 200 - (Math.min(p.cycle_out_cum_tb, maxY) / maxY) * 160;
+              path += `${started ? "L" : "M"} ${x.toFixed(2)} ${y.toFixed(2)} `;
+              started = true;
+            });
+            return path.trim();
+          },
+          buildCycleLabels(points, times, maxY) {
+            if (!points.length) return [];
+            const indexMap = new Map(times.map((t, idx) => [t, idx]));
+            const latest = points[points.length - 1];
+            const peak = points.reduce((acc, p) => (p.cycle_out_cum_tb > acc.cycle_out_cum_tb ? p : acc), points[0]);
+            const labels = [];
+            const toXY = (p) => {
+              const idx = indexMap.get(p.time);
+              if (idx === undefined) return null;
+              const x = (idx / Math.max(times.length - 1, 1)) * 1000;
+              const y = 200 - (Math.min(p.cycle_out_cum_tb, maxY) / maxY) * 160;
+              return { x, y };
+            };
+            const latestPos = toXY(latest);
+            if (latestPos) {
+              labels.push({
+                x: latestPos.x + 8,
+                y: latestPos.y - 6,
+                text: `${latest.cycle_out_cum_tb.toFixed(2)} TB`,
+              });
+            }
+            const peakPos = toXY(peak);
+            if (peakPos && peak !== latest) {
+              labels.push({
+                x: peakPos.x + 8,
+                y: peakPos.y - 6,
+                text: `${peak.cycle_out_cum_tb.toFixed(2)} TB`,
+              });
+            }
+            return labels;
+          },
+          barColor(value, max) {
+            const ratio = max > 0 ? Math.min(Math.max(value / max, 0), 1) : 0;
+            const hue = 140 - ratio * 110;
+            const light = 56 - ratio * 12;
+            return `hsl(${hue}, 70%, ${light}%)`;
+          },
+          barStrokeColor(value, max) {
+            const ratio = max > 0 ? Math.min(Math.max(value / max, 0), 1) : 0;
+            const hue = 140 - ratio * 110;
+            const light = 40 - ratio * 10;
+            return `hsl(${hue}, 70%, ${light}%)`;
+          },
+          toggleDailyServer(id) {
+            if (this.dailySelectedIds.includes(id)) {
+              this.dailySelectedIds = this.dailySelectedIds.filter((sid) => sid !== id);
+            } else {
+              this.dailySelectedIds = [...this.dailySelectedIds, id];
+            }
+            this.fetchDaily();
+          },
+          toggleHourlyServer(id) {
+            if (this.hourlySelectedIds.includes(id)) {
+              this.hourlySelectedIds = this.hourlySelectedIds.filter((sid) => sid !== id);
+            } else {
+              this.hourlySelectedIds = [...this.hourlySelectedIds, id];
+            }
+            this.fetchHourly();
+          },
+          toggleDailyLine(id) {
+            this.dailyPerServerLines = this.dailyPerServerLines.map((line) => {
+              if (line.id === id) {
+                const nextEnabled = !line.enabled;
+                if (!nextEnabled && this.dailyPinnedPoints[line.id] !== undefined) {
+                  const nextPinned = { ...this.dailyPinnedPoints };
+                  delete nextPinned[line.id];
+                  this.dailyPinnedPoints = nextPinned;
+                }
+                return { ...line, enabled: nextEnabled };
+              }
+              if (line.enabled === undefined) {
+                return { ...line, enabled: true };
+              }
+              return line;
+            });
+          },
+          toggleDailyPointLabel(lineId, idx) {
+            const current = this.dailyPinnedPoints[lineId];
+            const next = { ...this.dailyPinnedPoints };
+            if (current === idx) {
+              delete next[lineId];
+            } else {
+              next[lineId] = idx;
+            }
+            this.dailyPinnedPoints = next;
+          },
+          isDailyPointPinned(lineId, idx) {
+            return this.dailyPinnedPoints[lineId] === idx;
+          },
+          showHourlyLabel(idx, total, peakOutIdx, peakInIdx) {
+            if (total <= 6) return true;
+            const mid = Math.floor(total / 2);
+            if (idx === 0 || idx === mid || idx === total - 1) return true;
+            if (idx === peakOutIdx || idx === peakInIdx) return true;
+            return false;
+          },
+          showDailyLabel(idx, total, peakOutIdx, peakInIdx) {
+            if (total <= 10) return true;
+            const mid = Math.floor(total / 2);
+            if (idx === 0 || idx === mid || idx === total - 1) return true;
+            if (idx === peakOutIdx || idx === peakInIdx) return true;
+            return false;
+          },
+          formatTiB(value, digits = 3) {
+            const num = Number(value);
+            if (!Number.isFinite(num)) return (0).toFixed(digits);
+            const tib = num * 0.909495;
+            return tib.toFixed(digits);
+          },
+          clearHourlyDate() {
+            this.hourlyDate = "";
+            this.fetchHourly();
+          },
+          async login() {
+            this.error = "";
+            try {
+              const res = await fetch("/api/servers", { headers: this.authHeader() });
+              if (!res.ok) {
+                this.error = "登录失败。";
+                return;
+              }
+              localStorage.setItem("hz_user", this.username);
+              localStorage.setItem("hz_pass", this.password);
+              this.authed = true;
+              await this.refresh();
+            } catch (e) {
+              this.error = "网络错误。";
+            }
+          },
+          logout() {
+            this.authed = false;
+            this.password = "";
+          },
+          async refresh() {
+            const res = await fetch("/api/servers", { headers: this.authHeader() });
+            if (!res.ok) {
+              this.error = "加载服务器失败。";
+              return;
+            }
+            const data = await res.json();
+            this.servers = data.servers || [];
+            this.updatedAt = data.updated_at || "";
+            const traffic = data.traffic || {};
+            if (traffic.limit_tb) {
+              this.trafficLimitTb = parseFloat(traffic.limit_tb) || this.trafficLimitTb;
+            }
+            if (traffic.cost_per_tb_eur) {
+              this.costPerTb = traffic.cost_per_tb_eur;
+            }
+            this.rebuildMap = data.rebuilds || {};
+            const total = this.servers.reduce((sum, s) => sum + parseFloat(s.outbound_tb || 0), 0);
+            this.totalOutboundTb = total.toFixed(3);
+            const totalIn = this.servers.reduce((sum, s) => sum + parseFloat(s.inbound_tb || 0), 0);
+            this.totalInboundTb = totalIn.toFixed(3);
+            const tracking = data.tracking || {};
+            this.trackingOutboundTb = tracking.outbound_tb || "";
+            this.trackingInboundTb = tracking.inbound_tb || "";
+            this.trackingStart = tracking.start || "";
+            const peak = this.servers.reduce(
+              (acc, s) => {
+                const value = parseFloat(s.outbound_tb || 0);
+                if (value > acc.value) return { name: s.name, value: value.toFixed(3) };
+                return acc;
+              },
+              { name: "", value: "0.000" }
+            );
+            this.peakServer = peak;
+            const idToName = new Map(this.servers.map((s) => [String(s.id), s.name]));
+            const rebuildEntries = Object.entries(this.rebuildMap || {});
+            if (rebuildEntries.length) {
+              rebuildEntries.sort((a, b) => {
+                const da = new Date(a[1].replace(" ", "T"));
+                const db = new Date(b[1].replace(" ", "T"));
+                return da - db;
+              });
+              const [lastId, lastTime] = rebuildEntries[rebuildEntries.length - 1];
+              const lastName = idToName.get(String(lastId));
+              this.lastRebuildAt = lastTime;
+              this.lastRebuildServer = lastName ? `${lastName} (${lastId})` : String(lastId);
+            } else {
+              this.lastRebuildAt = "";
+              this.lastRebuildServer = "";
+            }
+            await this.fetchHourly();
+            await this.fetchDaily();
+          },
+          async fetchHourly() {
+            const query = this.hourlyDate ? `?date=${encodeURIComponent(this.hourlyDate)}` : "";
+            const res = await fetch(`/api/hourly${query}`, { headers: this.authHeader() });
+            if (!res.ok) return;
+            const data = await res.json();
+            const allHourKeys = data.hours || [];
+            const startKey = this.trackingStart || "";
+            const filteredHourKeys = startKey
+              ? allHourKeys.filter((label) => label >= startKey)
+              : allHourKeys;
+            const hourKeys = filteredHourKeys.length ? filteredHourKeys : allHourKeys;
+            const serverEntries = Object.entries(data.servers || {});
+            const enabledMap = new Map(this.perServerLines.map((l) => [l.id, l.enabled]));
+            const seriesByServer = new Map();
+            const seriesByServerIn = new Map();
+            serverEntries.forEach(([sid, srv]) => {
+              const deltas = srv.deltas || [];
+              const series = deltas.map((d) => (d && d.tb ? parseFloat(d.tb) : null));
+              seriesByServer.set(sid, series);
+              const seriesIn = deltas.map((d) => (d && d.in_tb ? parseFloat(d.in_tb) : null));
+              seriesByServerIn.set(sid, seriesIn);
+            });
+            const totalsAll = hourKeys.map((_, idx) => {
+              let sum = 0;
+              seriesByServer.forEach((series) => {
+                const value = series[idx];
+                if (value !== null && !Number.isNaN(value)) {
+                  sum += value;
+                }
+              });
+              return sum;
+            });
+            const totals = totalsAll;
+            const totalsInAll = hourKeys.map((_, idx) => {
+              let sum = 0;
+              seriesByServerIn.forEach((series) => {
+                const value = series[idx];
+                if (value !== null && !Number.isNaN(value)) {
+                  sum += value;
+                }
+              });
+              return sum;
+            });
+            const hourlyTicks = hourKeys.map((label, idx) => {
+              const x = (idx / Math.max(hourKeys.length - 1, 1)) * 1000;
+              return { x, label: label.slice(11, 16) };
+            });
+            const hourCount = Math.max(hourKeys.length, 1);
+            this.hourlySvgWidth = `${Math.max(100, (hourCount / 12) * 100)}%`;
+            const detailHourKeys = hourKeys;
+            const offset = hourKeys.length - detailHourKeys.length;
+            const hourlyBreakdown = detailHourKeys.map((label, idx) => ({
+              label: label.slice(11, 16),
+              tb: totals[idx + offset] !== undefined ? totals[idx + offset].toFixed(3) : "0.000",
+            }));
+            const hourlyLabels = detailHourKeys.map((label, idx) => {
+              const date = label.split(" ", 1)[0];
+              const time = label.slice(11, 16);
+              const prevDate = idx > 0 ? detailHourKeys[idx - 1].split(" ", 1)[0] : null;
+              return { key: label, date, time, showDate: date !== prevDate };
+            });
+            const hourlyTotals = detailHourKeys.map((_, idx) =>
+              totalsAll[idx + offset] !== undefined ? totalsAll[idx + offset].toFixed(3) : "0.000"
+            );
+            const now = new Date();
+            const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+              now.getDate()
+            ).padStart(2, "0")}`;
+            let todayOut = 0;
+            let todayIn = 0;
+            let foundToday = false;
+            hourKeys.forEach((label, idx) => {
+              const dateKey = label.split(" ", 1)[0];
+              if (dateKey !== todayKey) return;
+              foundToday = true;
+              todayOut += totalsAll[idx] || 0;
+              todayIn += totalsInAll[idx] || 0;
+            });
+            if (!foundToday && hourKeys.length) {
+              const fallbackDate = hourKeys[hourKeys.length - 1].split(" ", 1)[0];
+              hourKeys.forEach((label, idx) => {
+                if (!label.startsWith(fallbackDate)) return;
+                todayOut += totalsAll[idx] || 0;
+                todayIn += totalsInAll[idx] || 0;
+              });
+            }
+            this.todayOutboundTb = todayOut.toFixed(3);
+            this.todayInboundTb = todayIn.toFixed(3);
+            const hourlyByServer = serverEntries.map(([sid, srv]) => {
+              const deltas = srv.deltas || [];
+              const rows = hourKeys.map((label, idx) => {
+                const d = deltas[idx];
+                const tb = d && d.tb ? d.tb : "—";
+                return { label, tb };
+              });
+              return { id: sid, name: srv.name || sid, rows };
+            });
+            const palette = [
+              "#e11d48",
+              "#2563eb",
+              "#16a34a",
+              "#f59e0b",
+              "#7c3aed",
+              "#0ea5e9",
+              "#db2777",
+              "#65a30d",
+              "#f97316",
+              "#1d4ed8",
+              "#0891b2",
+              "#b45309",
+            ];
+            const serverOptions = hourlyByServer.map((srv, idx) => ({
+              id: srv.id,
+              name: srv.name,
+              color: palette[idx % palette.length],
+            }));
+            if (this.hourlySelectedIds.length === 0) {
+              this.hourlySelectedIds = serverOptions.map((srv) => srv.id);
+            } else {
+              const known = new Set(serverOptions.map((srv) => srv.id));
+              this.hourlySelectedIds = this.hourlySelectedIds.filter((id) => known.has(id));
+            }
+            const hourlyMatrixServers = hourlyByServer.filter((srv) => this.hourlySelectedIds.includes(srv.id));
+            const hourlyMatrix = {
+              servers: hourlyMatrixServers,
+              rows: detailHourKeys.map((label, idx) => ({
+                key: label,
+                dateDisplay: hourlyLabels[idx] && hourlyLabels[idx].showDate
+                  ? hourlyLabels[idx].date
+                  : "",
+                time: hourlyLabels[idx] ? hourlyLabels[idx].time : label.slice(11, 16),
+                values: hourlyMatrixServers.map((srv) =>
+                  srv.rows[idx + offset] ? srv.rows[idx + offset].tb : "—"
+                ),
+                total: hourlyTotals[idx] || "0.000",
+              })),
+            };
+            const maxTotal = Math.max(...totalsAll, ...totalsInAll, 0.001);
+            const maxOut = Math.max(...totalsAll, 0);
+            const maxIn = Math.max(...totalsInAll, 0);
+            const peakOutIdx = totalsAll.findIndex((val) => val === maxOut);
+            const peakInIdx = totalsInAll.findIndex((val) => val === maxIn);
+            const tbToTiB = 0.909495;
+            const toTiB = (val) => val * tbToTiB;
+            const avgOut = totalsAll.length
+              ? totalsAll.reduce((acc, val) => acc + val, 0) / totalsAll.length
+              : 0;
+            const avgIn = totalsInAll.length
+              ? totalsInAll.reduce((acc, val) => acc + val, 0) / totalsInAll.length
+              : 0;
+            const basePoints = totals.map((value, idx) => {
+              const x = (idx / Math.max(totals.length - 1, 1)) * 1000;
+              const y = 200 - (value / maxTotal) * 160;
+              const label = hourKeys[idx] || "";
+              return { x, y, value, label };
+            });
+            const totalLine = basePoints
+              .map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+              .join(" ");
+            const totalArea = `${totalLine} L 1000 200 L 0 200 Z`;
+            const perServerLines = serverEntries.map(([sid, srv], idx) => {
+              const enabled = enabledMap.size ? enabledMap.get(sid) !== false : true;
+              if (!enabled) {
+                return { id: sid, name: srv.name || sid, path: "", color: palette[idx % palette.length], enabled };
+              }
+              const series = seriesByServer.get(sid) || [];
+              const points = series.map((value, i) => {
+                const x = (i / Math.max(series.length - 1, 1)) * 1000;
+                const safeValue = value === null || Number.isNaN(value) ? 0 : value;
+                const y = 240 - (safeValue / maxTotal) * 200;
+                return { x, y };
+              });
+              const path = points
+                .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+                .join(" ");
+              return { id: sid, name: srv.name || sid, path, color: palette[idx % palette.length], enabled };
+            });
+            const colorById = new Map(perServerLines.map((line) => [line.id, line.color]));
+            const serverSpark = {};
+            seriesByServer.forEach((series, sid) => {
+              const values = series.filter((v) => v !== null && !Number.isNaN(v));
+              const max = Math.max(...values, 0.001);
+              let path = "";
+              let started = false;
+              series.forEach((value, idx) => {
+                if (value === null || Number.isNaN(value)) {
+                  started = false;
+                  return;
+                }
+                const x = (idx / Math.max(series.length - 1, 1)) * 100;
+                const y = 28 - (value / max) * 24;
+                path += `${started ? "L" : "M"} ${x.toFixed(2)} ${y.toFixed(2)} `;
+                started = true;
+              });
+              const srv = (data.servers || {})[sid] || {};
+              const nameKey = srv.name || sid;
+              serverSpark[nameKey] = { path: path.trim(), color: colorById.get(sid) || "#22c55e" };
+            });
+
+            const maxSeries = hourKeys.map((_, idx) => {
+              let max = 0;
+              let min = Number.POSITIVE_INFINITY;
+              serverEntries.forEach(([, srv]) => {
+                const d = (srv.deltas || [])[idx];
+                const v = d && d.tb ? parseFloat(d.tb) : 0;
+                if (v > max) max = v;
+                if (v < min) min = v;
+              });
+              if (!isFinite(min)) min = 0;
+              return { max, min };
+            });
+            const maxVal = Math.max(...maxSeries.map((v) => v.max), 0.001);
+            const candles = maxSeries.map((v, idx) => {
+              const x = (idx / Math.max(maxSeries.length - 1, 1)) * 1000;
+              const close = totals[idx] || 0;
+              const open = idx === 0 ? close : totals[idx - 1] || 0;
+              const high = v.max;
+              const low = v.min;
+              const toY = (val) => 240 - (val / maxVal) * 200;
+              return {
+                x,
+                openY: toY(open),
+                closeY: toY(close),
+                highY: toY(high),
+                lowY: toY(low),
+                up: close >= open,
+              };
+            });
+
+            this.hourlySeries = totals;
+            this.hourlyInSeries = totalsInAll;
+            this.hourlyLinePath = totalLine;
+            this.hourlyAreaPath = totalArea;
+            const inPoints = totalsInAll.map((value, idx) => {
+              const x = (idx / Math.max(totalsInAll.length - 1, 1)) * 1000;
+              const y = 200 - (value / maxTotal) * 160;
+              const label = hourKeys[idx] || "";
+              return { x, y, value, label };
+            });
+            this.hourlyInLinePath = inPoints
+              .map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+              .join(" ");
+            this.hourlyOutPoints = basePoints;
+            this.hourlyInPoints = inPoints;
+            const tickCount = 6;
+            const step = Math.max(maxTotal / (tickCount - 1), 0.05);
+            const yTicks = Array.from({ length: tickCount }, (_, i) => i * step);
+            this.hourlyYAxisTicks = yTicks.map((value) => ({
+              value,
+              label: toTiB(value).toFixed(2).replace(/\.00$/, ""),
+              y: 200 - (value / maxTotal) * 160,
+            }));
+            this.perServerLines = perServerLines;
+            this.hourlyTicks = hourlyTicks;
+            this.hourlyBreakdown = hourlyBreakdown;
+            this.hourlyByServer = hourlyByServer;
+            this.hourlyMatrix = hourlyMatrix;
+            this.hourlyTotals = hourlyTotals;
+            this.hourlyServerOptions = serverOptions;
+            this.hourlyRange = detailHourKeys.length
+              ? `${detailHourKeys[0]} ~ ${detailHourKeys[detailHourKeys.length - 1]}`
+              : "";
+            this.hourlySeriesRaw = hourKeys.map((label, idx) => ({
+              date: label.split(" ", 1)[0],
+              hour: parseInt(label.slice(11, 13), 10),
+              out_gb_h: (totalsAll[idx] || 0) * 1024,
+            }));
+            this.serverSpark = serverSpark;
+            this.bandPeak = maxVal.toFixed(3);
+            this.bandCandles = candles;
+            this.bandScale = {
+              max: `${maxVal.toFixed(3)} TB`,
+              p75: `${(maxVal * 0.75).toFixed(3)} TB`,
+              p50: `${(maxVal * 0.5).toFixed(3)} TB`,
+              p25: `${(maxVal * 0.25).toFixed(3)} TB`,
+              min: "0.000 TB",
+            };
+            this.hourlyScale = {
+              max: `${maxTotal.toFixed(3)} TB`,
+              p75: `${(maxTotal * 0.75).toFixed(3)} TB`,
+              p50: `${(maxTotal * 0.5).toFixed(3)} TB`,
+              p25: `${(maxTotal * 0.25).toFixed(3)} TB`,
+            };
+            this.hourlyLabelStart = hourKeys[0] ? hourKeys[0].slice(11, 16) : "--:--";
+            const hourlyMid = hourKeys[Math.floor(hourKeys.length / 2)];
+            this.hourlyLabelMid = hourlyMid ? hourlyMid.slice(11, 16) : "--:--";
+            this.hourlyLabelEnd = hourKeys[hourKeys.length - 1]
+              ? hourKeys[hourKeys.length - 1].slice(11, 16)
+              : "--:--";
+            this.hourlyPeak = toTiB(maxTotal).toFixed(3);
+            this.hourlyPeakOutIdx = peakOutIdx;
+            this.hourlyPeakInIdx = peakInIdx;
+            this.hourlyPeakOut = toTiB(maxOut).toFixed(3);
+            this.hourlyPeakIn = toTiB(maxIn).toFixed(3);
+            this.hourlyAvgOut = toTiB(avgOut).toFixed(3);
+            this.hourlyAvgIn = toTiB(avgIn).toFixed(3);
+          },
+          async fetchDaily() {
+            const res = await fetch("/api/daily", { headers: this.authHeader() });
+            if (!res.ok) return;
+            const data = await res.json();
+            const days = this._withDemoDays(data.days || []);
+            const dailyServers = (data.servers || []).map((srv) => ({
+              id: srv.id,
+              name: srv.name || srv.id,
+              days: srv.days || [],
+            }));
+            const dailyOptions = dailyServers.map((srv, idx) => ({
+              id: srv.id,
+              name: srv.name,
+              color: [
+                "#e11d48",
+                "#2563eb",
+                "#16a34a",
+                "#f59e0b",
+                "#7c3aed",
+                "#0ea5e9",
+                "#db2777",
+                "#65a30d",
+                "#f97316",
+                "#1d4ed8",
+                "#0891b2",
+                "#b45309",
+              ][idx % 12],
+            }));
+            if (this.dailySelectedIds.length === 0) {
+              this.dailySelectedIds = dailyOptions.map((srv) => srv.id);
+            } else {
+              const known = new Set(dailyOptions.map((srv) => srv.id));
+              this.dailySelectedIds = this.dailySelectedIds.filter((id) => known.has(id));
+            }
+            const stackDays = days.slice(-7);
+            const maxStack = Math.max(
+              ...stackDays.map((d) => Math.max(parseFloat(d.outbound_tb || 0), parseFloat(d.inbound_tb || 0))),
+              0.01
+            );
+            this.dailyStackDays = stackDays.map((d) => {
+              const out = parseFloat(d.outbound_tb || 0);
+              const inn = parseFloat(d.inbound_tb || 0);
+              return {
+                date: d.date,
+                out: out.toFixed(3),
+                in: inn.toFixed(3),
+                outPct: Math.min(100, (out / maxStack) * 100),
+                inPct: Math.min(100, (inn / maxStack) * 100),
+              };
+            });
+            const selectedDaily = dailyServers.filter((srv) => this.dailySelectedIds.includes(srv.id));
+            const matrixDays = days.slice(-14);
+            const dayKeys = matrixDays.map((d) => d.date);
+            const dailyMatrix = {
+              servers: selectedDaily,
+              rows: dayKeys.map((date) => ({
+                date,
+                outValues: selectedDaily.map((srv) => {
+                  const row = (srv.days || []).find((d) => d.date === date);
+                  return row ? row.outbound_tb : "—";
+                }),
+                inValues: selectedDaily.map((srv) => {
+                  const row = (srv.days || []).find((d) => d.date === date);
+                  return row ? row.inbound_tb : "—";
+                }),
+              })),
+            };
+            this.dailyServers = dailyServers;
+            this.dailyServerOptions = dailyOptions;
+            this.dailyMatrix = dailyMatrix;
+            const enabledMap = new Map(this.dailyPerServerLines.map((line) => [line.id, line.enabled]));
+            const peak = parseFloat(data.peak || 0);
+            const inPeak = parseFloat(data.in_peak || 0);
+            this.dailyPeak = data.peak || "0.000";
+            this.dailyTotal = data.total || "0.000";
+            this.dailyInboundPeak = data.in_peak || "0.000";
+            this.dailyInboundTotal = data.in_total || "0.000";
+            const scaleMax = Math.max(peak, inPeak, 1);
+            const pointsOut = days.map((d, idx) => {
+              const value = parseFloat(d.outbound_tb || 0);
+              const safeValue = Math.min(value, scaleMax);
+              const x = (idx / Math.max(days.length - 1, 1)) * 1000;
+              const y = 200 - (safeValue / scaleMax) * 160;
+              return { x, y, value };
+            });
+            const pointsIn = days.map((d, idx) => {
+              const value = parseFloat(d.inbound_tb || 0);
+              const safeValue = Math.min(value, scaleMax);
+              const x = (idx / Math.max(days.length - 1, 1)) * 1000;
+              const y = 200 - (safeValue / scaleMax) * 160;
+              return { x, y, value };
+            });
+            const maxDayOut = pointsOut.reduce((acc, p) => (p.value > acc ? p.value : acc), 0);
+            const maxDayIn = pointsIn.reduce((acc, p) => (p.value > acc ? p.value : acc), 0);
+            const peakDayOutIdx = pointsOut.findIndex((p) => p.value === maxDayOut);
+            const peakDayInIdx = pointsIn.findIndex((p) => p.value === maxDayIn);
+            const lineOut = pointsOut
+              .map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+              .join(" ");
+            const lineIn = pointsIn
+              .map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+              .join(" ");
+            const areaOut = `${lineOut} L 1000 200 L 0 200 Z`;
+            const areaIn = `${lineIn} L 1000 200 L 0 200 Z`;
+            this.dailySeries = days;
+            this.dailyOutPoints = pointsOut;
+            this.dailyInPoints = pointsIn;
+            this.dailyLinePath = lineOut;
+            this.dailyAreaPath = areaOut;
+            this.dailyInLinePath = lineIn;
+            this.dailyInAreaPath = areaIn;
+            const dayCount = Math.max(days.length, 1);
+            this.dailySvgWidth = `${Math.max(100, (dayCount / 14) * 100)}%`;
+            const tickStep = days.length > 28 ? 3 : days.length > 14 ? 2 : 1;
+            this.dailyTicks = pointsOut
+              .map((p, idx) => ({
+                x: p.x,
+                label: idx % tickStep === 0 && days[idx] && days[idx].date ? days[idx].date.slice(5) : "",
+              }))
+              .filter((t) => t.label);
+            this.dailyLabelStart = days[0] ? days[0].date : "----";
+            this.dailyLabelMid = days[Math.floor(days.length / 2)] ? days[Math.floor(days.length / 2)].date : "----";
+            this.dailyLabelEnd = days[days.length - 1] ? days[days.length - 1].date : "----";
+            this.dailyPeakOutIdx = peakDayOutIdx;
+            this.dailyPeakInIdx = peakDayInIdx;
+            const tickCount = 6;
+            const step = Math.max(scaleMax / (tickCount - 1), 0.1);
+            const yTicks = Array.from({ length: tickCount }, (_, i) => i * step);
+            this.dailyYAxisTicks = yTicks.map((value) => ({
+              value,
+              label: value.toFixed(1).replace(/\.0$/, ""),
+              y: 200 - (value / scaleMax) * 160,
+            }));
+            this.dailyScale = { t15: "15 TiB", t10: "10 TiB", t5: "5 TiB", t0: "0 TiB" };
+            const perServerLines = dailyServers.map((srv, idx) => {
+              const enabled = enabledMap.size ? enabledMap.get(srv.id) !== false : true;
+              const color = dailyOptions[idx % dailyOptions.length]?.color || "#22c55e";
+              const labelOffset = (idx % 3) * 8;
+              const points = days.map((d, di) => {
+                const row = (srv.days || []).find((r) => r.date === d.date);
+                const value = row ? parseFloat(row.outbound_tb || 0) : 0;
+                const safeValue = Math.min(value, scaleMax);
+                const x = (di / Math.max(days.length - 1, 1)) * 1000;
+                const y = 200 - (safeValue / scaleMax) * 160;
+                return { x, y, value, labelY: Math.max(y - 8 - labelOffset, 14) };
+              });
+              const path = points
+                .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+                .join(" ");
+              return {
+                id: srv.id,
+                name: srv.name || srv.id,
+                color,
+                path,
+                enabled,
+                points,
+              };
+            });
+            this.dailyPerServerLines = perServerLines;
+            const dayMap = new Map(days.map((d) => [d.date, d]));
+            const todayKey = this.formatDateKey(new Date());
+            const yesterdayDate = new Date();
+            yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+            const yesterdayKey = this.formatDateKey(yesterdayDate);
+            const todayRow = dayMap.get(todayKey) || days[days.length - 1];
+            const yesterdayRow = dayMap.get(yesterdayKey);
+            const todayOut = todayRow ? parseFloat(todayRow.outbound_tb || 0) : 0;
+            const todayIn = todayRow ? parseFloat(todayRow.inbound_tb || 0) : 0;
+            const yesterdayOut = yesterdayRow ? parseFloat(yesterdayRow.outbound_tb || 0) : 0;
+            const yesterdayIn = yesterdayRow ? parseFloat(yesterdayRow.inbound_tb || 0) : 0;
+            this.yesterdayOutboundTb = yesterdayRow ? yesterdayOut.toFixed(3) : "—";
+            this.yesterdayInboundTb = yesterdayRow ? yesterdayIn.toFixed(3) : "—";
+            const deltaOut = todayOut - yesterdayOut;
+            const deltaStr = `${deltaOut >= 0 ? "+" : ""}${deltaOut.toFixed(3)}`;
+            this.dayDeltaTb = yesterdayRow ? deltaStr : "—";
+            if (yesterdayOut > 0) {
+              const pct = (deltaOut / yesterdayOut) * 100;
+              this.dayDeltaPct = `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%`;
+            } else {
+              this.dayDeltaPct = "—";
+            }
+            if (yesterdayRow) {
+              this.dayDeltaClass = deltaOut >= 0 ? "delta-up" : "delta-down";
+            } else {
+              this.dayDeltaClass = "";
+            }
+            const now = new Date();
+            const monthKey = `${now.getFullYear()}-${this.twoDigit(now.getMonth() + 1)}`;
+            const monthRows = days.filter((d) => d.date && d.date.startsWith(monthKey));
+            const monthOut = monthRows.reduce((sum, d) => sum + parseFloat(d.outbound_tb || 0), 0);
+            const monthIn = monthRows.reduce((sum, d) => sum + parseFloat(d.inbound_tb || 0), 0);
+            this.monthOutboundTb = monthOut.toFixed(3);
+            this.monthInboundTb = monthIn.toFixed(3);
+            const recentDays = days.slice(-Math.max(this.etaWindowDays, 1));
+            const avgOut =
+              recentDays.reduce((sum, d) => sum + parseFloat(d.outbound_tb || 0), 0) /
+              Math.max(recentDays.length, 1);
+            this.avgDailyOutboundTb = avgOut.toFixed(3);
+            this.monthDailyAvgTb = avgOut.toFixed(3);
+            const peakDay = monthRows.reduce(
+              (acc, row) => {
+                const value = parseFloat(row.outbound_tb || 0);
+                if (value > acc.value) {
+                  return { value, date: row.date };
+                }
+                return acc;
+              },
+              { value: 0, date: "" }
+            );
+            this.monthPeakTb = peakDay.value ? peakDay.value.toFixed(3) : "0.000";
+            this.monthPeakDay = peakDay.date;
+            const limit = parseFloat(this.trafficLimitTb || 18) || 18;
+            const serverDailyMap = new Map();
+            dailyServers.forEach((srv) => {
+              const entries = (srv.days || []).map((d) => ({
+                date: d.date,
+                outbound: parseFloat(d.outbound_tb || 0),
+              }));
+              serverDailyMap.set(srv.name || srv.id, entries);
+            });
+            const windowDays = days.slice(-Math.max(this.etaWindowDays, 1)).map((d) => d.date);
+            this.servers = this.servers.map((srv) => {
+              const entries = serverDailyMap.get(srv.name) || [];
+              const windowEntries = entries.filter((row) => windowDays.includes(row.date));
+              const avg =
+                windowEntries.reduce((sum, row) => sum + (row.outbound || 0), 0) /
+                Math.max(windowEntries.length, 1);
+              const usedTb = parseFloat(srv.outbound_tb || 0) || 0;
+              const remainingTb = Math.max(0, limit - usedTb);
+              if (!avg || !Number.isFinite(avg)) {
+                return { ...srv, eta_days: null, eta_display: "—" };
+              }
+              const etaDays = remainingTb / avg;
+              const etaDate = new Date(now.getTime() + etaDays * 86400 * 1000);
+              return {
+                ...srv,
+                eta_days: etaDays,
+                eta_display: `${etaDays.toFixed(1)} 天 (${this.formatDate(etaDate)})`,
+              };
+            });
+          },
+          async fetchCycle() {
+            const res = await fetch("/api/cycle", { headers: this.authHeader() });
+            if (!res.ok) return;
+            const data = await res.json();
+            const servers = data.servers || {};
+            this.cycleServers = servers;
+            const summaries = [];
+            let totalUsed = 0;
+            const budget = 20;
+            const combined = [];
+            const rebuilds = new Set();
+            Object.entries(servers).forEach(([id, srv]) => {
+              const points = (srv.points || []).map((p) => ({
+                time: p.time,
+                out_tb_h: parseFloat(p.out_tb_h || 0),
+                cycle_out_cum_tb: parseFloat(p.cycle_out_cum_tb || 0),
+                cycle_age_h: p.cycle_age_h ?? 0,
+                hour_of_day: p.hour_of_day ?? null,
+              }));
+              if (!points.length) return;
+              const latest = points[points.length - 1];
+              const current = latest ? latest.cycle_out_cum_tb : 0;
+              const remaining = Math.max(0, budget - current);
+              const etaHours = this.computeEta(points, budget, 18);
+              totalUsed += current;
+              combined.push({ id, name: srv.name || id, points, used: current });
+              (srv.rebuilds || []).forEach((t) => rebuilds.add(t));
+              summaries.push({
+                id,
+                name: srv.name || id,
+                usedTb: current.toFixed(3),
+                remainingTb: remaining.toFixed(3),
+                etaHours,
+                etaDisplay: this.formatEta(etaHours),
+              });
+            });
+            this.cycleServerSummaries = summaries;
+            this.cycleTotalUsedTb = totalUsed.toFixed(3);
+            this.cycleTotalBudgetTb = (summaries.length * budget).toFixed(0);
+            const totalRemaining = Math.max(0, summaries.length * budget - totalUsed);
+            this.cycleTotalRemainingTb = totalRemaining.toFixed(3);
+
+            if (!combined.length) {
+              this.cycleCombinedLines = [];
+              this.cycleCombinedLegend = [];
+              this.cycleCombinedTicks = [];
+              this.cycleCombinedRebuildMarks = [];
+              this.cycleCombinedSvgWidth = "100%";
+              this.cycleHeatmapCells = [];
+              this.cycleHeatmapMax = 0;
+              return;
+            }
+
+            const allTimes = Array.from(
+              new Set(
+                combined.flatMap((item) => item.points.map((p) => p.time))
+              )
+            ).sort();
+            const pointCount = allTimes.length;
+            this.cycleCombinedSvgWidth = `${Math.max(100, (pointCount / 24) * 100)}%`;
+            this.cycleCombinedLine18Y = 200 - (18 / budget) * 160;
+
+            const palette = [
+              "#e11d48",
+              "#2563eb",
+              "#16a34a",
+              "#f59e0b",
+              "#7c3aed",
+              "#0ea5e9",
+              "#db2777",
+              "#65a30d",
+              "#f97316",
+              "#1d4ed8",
+              "#0891b2",
+              "#b45309",
+            ];
+            this.cycleCombinedLines = combined.map((item, idx) => ({
+              id: item.id,
+              color: palette[idx % palette.length],
+              path: this.buildCycleLine(item.points, allTimes, budget),
+              labels: this.buildCycleLabels(item.points, allTimes, budget),
+            }));
+            this.cycleCombinedLegend = combined.map((item, idx) => ({
+              id: item.id,
+              name: item.name,
+              usedTb: item.used.toFixed(3),
+              color: palette[idx % palette.length],
+            }));
+
+            const tickCount = Math.min(6, pointCount);
+            const ticks = [];
+            for (let i = 0; i < tickCount; i += 1) {
+              const idx = Math.round((i / Math.max(tickCount - 1, 1)) * (pointCount - 1));
+              const label = allTimes[idx] ? allTimes[idx].slice(5, 16) : "";
+              ticks.push({ x: (idx / Math.max(pointCount - 1, 1)) * 1000, label });
+            }
+            this.cycleCombinedTicks = ticks;
+
+            const indexMap = new Map(allTimes.map((t, idx) => [t, idx]));
+            this.cycleCombinedRebuildMarks = Array.from(rebuilds)
+              .map((key) => {
+                const idx = indexMap.get(key);
+                if (idx === undefined) return null;
+                return (idx / Math.max(pointCount - 1, 1)) * 1000;
+              })
+              .filter((x) => x !== null);
+
+            const ageMax = Math.min(
+              this.cycleHeatmapAgeMax,
+              Math.max(...combined.flatMap((item) => item.points.map((p) => p.cycle_age_h || 0)))
+            );
+            const grid = Array.from({ length: 24 }, () => Array(ageMax + 1).fill(0));
+            const counts = Array.from({ length: 24 }, () => Array(ageMax + 1).fill(0));
+            combined.forEach((item) => {
+              item.points.forEach((p) => {
+                if (p.hour_of_day === null) return;
+                if (p.cycle_age_h > ageMax) return;
+                const outGbH = (p.out_tb_h || 0) * 1024;
+                grid[p.hour_of_day][p.cycle_age_h] += outGbH;
+                counts[p.hour_of_day][p.cycle_age_h] += 1;
+              });
+            });
+            const cells = [];
+            let maxValue = 0;
+            let minValue = null;
+            let sumValue = 0;
+            let countValue = 0;
+            for (let hour = 0; hour < 24; hour += 1) {
+              for (let age = 0; age <= ageMax; age += 1) {
+                const value = counts[hour][age] ? grid[hour][age] / counts[hour][age] : 0;
+                if (value > maxValue) maxValue = value;
+                if (counts[hour][age]) {
+                  if (minValue === null || value < minValue) minValue = value;
+                  sumValue += value;
+                  countValue += 1;
+                }
+                cells.push({ hour, age, value });
+              }
+            }
+            this.cycleHeatmapCells = cells;
+            this.cycleHeatmapMax = maxValue;
+            this.cycleHeatmapMin = minValue === null ? 0 : minValue;
+            this.cycleHeatmapAvg = countValue ? sumValue / countValue : 0;
+          },
+          computeEta(points, budget, trigger) {
+            if (!points.length) return null;
+            const latest = points[points.length - 1];
+            const current = latest ? latest.cycle_out_cum_tb : 0;
+            const etaWindow = this.cycleEtaWindowHours;
+            const slice = points.slice(-etaWindow);
+            const avgTb =
+              slice.reduce((sum, row) => sum + (row.out_tb_h || 0), 0) / Math.max(slice.length, 1);
+            const burnGbH = avgTb * 1024;
+            if (burnGbH <= 0) return null;
+            if (current >= trigger) return 0;
+            return ((trigger - current) * 1024) / burnGbH;
+          },
+          buildCycleChart(id, name, points, rebuilds) {
+            const safePoints = points.map((p) => ({
+              time: p.time,
+              out_tb_h: parseFloat(p.out_tb_h || 0),
+              cycle_out_cum_tb: parseFloat(p.cycle_out_cum_tb || 0),
+              cycle_age_h: p.cycle_age_h ?? 0,
+              hour_of_day: p.hour_of_day ?? null,
+            }));
+            if (!safePoints.length) {
+              return {
+                id,
+                name,
+                usedTb: "0.000",
+                remainingTb: "20.000",
+                gaugePct: "0%",
+                gaugeColor: this.cycleGaugeColorFor(0),
+                etaDisplay: "—",
+                etaPath: "",
+                etaSvgWidth: "100%",
+                sawPath: "",
+                sawPoints: [],
+                sawSvgWidth: "100%",
+                line18Y: 0,
+                rebuildMarks: [],
+                ticks: [],
+                heatmapCells: [],
+                heatmapMax: 0,
+                heatmapAgeMax: this.cycleHeatmapAgeMax,
+              };
+            }
+
+            const budget = 20;
+            const trigger = 18;
+            const latest = safePoints[safePoints.length - 1];
+            const current = latest ? latest.cycle_out_cum_tb : 0;
+            const remaining = Math.max(0, budget - current);
+            const pct = Math.min(100, (current / budget) * 100);
+            const gaugePct = `${pct.toFixed(1)}%`;
+            const gaugeColor = this.cycleGaugeColorFor(current);
+
+            const maxY = budget;
+            const pointCount = safePoints.length;
+            const sawSvgWidth = `${Math.max(100, (pointCount / 24) * 100)}%`;
+            const sawPoints = safePoints.map((p, idx) => {
+              const x = (idx / Math.max(pointCount - 1, 1)) * 1000;
+              const y = 200 - (Math.min(p.cycle_out_cum_tb, maxY) / maxY) * 160;
+              return { x, y, value: p.cycle_out_cum_tb, label: p.time };
+            });
+            const sawPath = sawPoints
+              .map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+              .join(" ");
+            const line18Y = 200 - (trigger / maxY) * 160;
+
+            const indexMap = new Map(safePoints.map((p, idx) => [p.time, idx]));
+            const rebuildMarks = (rebuilds || [])
+              .map((key) => {
+                const idx = indexMap.get(key);
+                if (idx === undefined) return null;
+                return (idx / Math.max(pointCount - 1, 1)) * 1000;
+              })
+              .filter((x) => x !== null);
+
+            const tickCount = Math.min(6, pointCount);
+            const ticks = [];
+            for (let i = 0; i < tickCount; i += 1) {
+              const idx = Math.round((i / Math.max(tickCount - 1, 1)) * (pointCount - 1));
+              const p = safePoints[idx];
+              ticks.push({ x: (idx / Math.max(pointCount - 1, 1)) * 1000, label: p.time.slice(5, 16) });
+            }
+
+            const etaWindow = this.cycleEtaWindowHours;
+            const etaHistory = safePoints.map((p, idx) => {
+              const start = Math.max(0, idx - etaWindow + 1);
+              const slice = safePoints.slice(start, idx + 1);
+              const avgTb =
+                slice.reduce((sum, row) => sum + (row.out_tb_h || 0), 0) / Math.max(slice.length, 1);
+              const burnGbH = avgTb * 1024;
+              if (burnGbH <= 0) return null;
+              if (p.cycle_out_cum_tb >= trigger) return null;
+              return ((trigger - p.cycle_out_cum_tb) * 1024) / burnGbH;
+            });
+            const lastEta = etaHistory[etaHistory.length - 1];
+            const etaHours = lastEta === null ? null : lastEta;
+
+            const etaSeries = etaHistory.slice(-24);
+            const etaValues = etaSeries.filter((v) => v !== null);
+            const etaMax = Math.max(...etaValues, 1);
+            let etaPath = "";
+            let started = false;
+            etaSeries.forEach((val, idx) => {
+              if (val === null || Number.isNaN(val)) {
+                started = false;
+                return;
+              }
+              const x = (idx / Math.max(etaSeries.length - 1, 1)) * 1000;
+              const y = 140 - (val / etaMax) * 110;
+              etaPath += `${started ? "L" : "M"} ${x.toFixed(2)} ${y.toFixed(2)} `;
+              started = true;
+            });
+            const etaSvgWidth = "100%";
+
+            const ageMax = this.cycleHeatmapAgeMax;
+            const grid = Array.from({ length: 24 }, () => Array(ageMax + 1).fill(0));
+            const counts = Array.from({ length: 24 }, () => Array(ageMax + 1).fill(0));
+            safePoints.forEach((p) => {
+              if (p.hour_of_day === null) return;
+              if (p.cycle_age_h > ageMax) return;
+              const outGbH = (p.out_tb_h || 0) * 1024;
+              grid[p.hour_of_day][p.cycle_age_h] += outGbH;
+              counts[p.hour_of_day][p.cycle_age_h] += 1;
+            });
+            const cells = [];
+            let maxValue = 0;
+            for (let hour = 0; hour < 24; hour += 1) {
+              for (let age = 0; age <= ageMax; age += 1) {
+                const value = counts[hour][age] ? grid[hour][age] / counts[hour][age] : 0;
+                if (value > maxValue) maxValue = value;
+                cells.push({ hour, age, value });
+              }
+            }
+            return {
+              id,
+              name,
+              usedTb: current.toFixed(3),
+              remainingTb: remaining.toFixed(3),
+              gaugePct,
+              gaugeColor,
+              etaDisplay: this.formatEta(etaHours),
+              etaPath: etaPath.trim(),
+              etaSvgWidth,
+              sawPath,
+              sawPoints,
+              sawSvgWidth,
+              line18Y,
+              rebuildMarks,
+              ticks,
+              heatmapCells: cells,
+              heatmapMax: maxValue,
+              heatmapAgeMax: ageMax,
+            };
+          },
+          toggleLine(id) {
+            const next = this.perServerLines.map((line) => {
+              if (line.id === id) {
+                return { ...line, enabled: !line.enabled };
+              }
+              if (line.enabled === undefined) {
+                return { ...line, enabled: true };
+              }
+              return line;
+            });
+            this.perServerLines = next;
+            this.fetchHourly();
+          },
+          async dnsCheck(id) {
+            const payload = id ? { server_id: id } : {};
+            const res = await fetch("/api/dns_check", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", ...this.authHeader() },
+              body: JSON.stringify(payload),
+            });
+            if (!res.ok) {
+              alert("DNS 检查失败。");
+              return;
+            }
+            const data = await res.json();
+            const lines = (data.results || []).map((r) => {
+              if (r.ok) return `OK: ${r.record} -> ${r.resolved}`;
+              if (r.status === "missing") return `缺少映射: ${r.id}`;
+              if (r.error) return `错误: ${r.record} (${r.error})`;
+              return `不匹配: ${r.record} -> ${r.resolved}, 期望 ${r.expected}`;
+            });
+            alert(lines.join("\n"));
+          },
+          async rebuild(id) {
+            if (!confirm("确定立即重建该服务器？")) return;
+            const res = await fetch("/api/rebuild", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", ...this.authHeader() },
+              body: JSON.stringify({ server_id: id }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              alert("重建失败: " + (data.error || "未知错误"));
+              return;
+            }
+            alert("重建已开始，新 IP: " + data.rebuild.new_ip);
+            await this.refresh();
+          },
+        },
+        mounted() {
+          if (this.username && this.password) {
+            this.login();
+          }
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

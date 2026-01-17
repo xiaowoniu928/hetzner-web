@@ -1,0 +1,39 @@
+hetzner:
+  api_token: "YOUR_HETZNER_API_TOKEN"
+
+traffic:
+  limit_gb: 18432
+  check_interval: 5
+  exceed_action: "rebuild"
+
+scheduler:
+  enabled: false
+  delete_time: "23:50"
+  create_time: "08:00"
+
+telegram:
+  enabled: false
+  bot_token: "YOUR_TELEGRAM_BOT_TOKEN"
+  chat_id: "YOUR_TELEGRAM_CHAT_ID"
+
+cloudflare:
+  api_token: "YOUR_CLOUDFLARE_API_TOKEN"
+  zone_id: "YOUR_CLOUDFLARE_ZONE_ID"
+  record_map:
+    "SERVER_ID_1": "server-a.example.com"
+    "SERVER_ID_2": "server-b.example.com"
+
+rebuild:
+  mode: "snapshot"
+  snapshot:
+    use_latest: true
+    auto_create: true
+    keep_snapshots: 3
+  snapshot_id_map:
+    "SERVER_ID_1": "SNAPSHOT_ID_1"
+    "SERVER_ID_2": "SNAPSHOT_ID_2"
+  fallback_template:
+    server_type: "cx43"
+    location: "nbg1"
+    image: "ubuntu-22.04"
+    ssh_keys: []

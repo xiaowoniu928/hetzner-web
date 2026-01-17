@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.log
+config.yaml
+web_config.json
+report_state.json
+.env
